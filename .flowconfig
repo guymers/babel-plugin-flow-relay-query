@@ -1,0 +1,10 @@
+[include]
+
+[ignore]
+.*/node_modules/fbjs/flow/include/.*
+.*/node_modules/eslint.*/.*
+.*/lib/.*
+
+[libs]
+
+[options]

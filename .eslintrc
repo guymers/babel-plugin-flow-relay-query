@@ -1,0 +1,19 @@
+{
+  "extends": ["airbnb/base"],
+
+  "env": {
+    "node": true,
+    "mocha": true
+  },
+
+  "ecmaFeatures": {
+    "restParams": true
+  },
+
+  "rules": {
+    "quotes": [2, "double"],
+    "curly": [2, "all"],
+    "comma-dangle": [0],
+    "spaced-comment": [0]
+  }
+}
