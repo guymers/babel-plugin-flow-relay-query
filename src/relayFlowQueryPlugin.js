@@ -76,60 +76,143 @@ export default function({ Plugin, types: t }: Object): PluginClass {
     state.opts.extra.classPropTypes[className] = propType;
   }
 
+  function storeImports(state, filename, variables) {
+    state.opts.extra.storedImports = state.opts.extra.storedImports || {};
+    variables.forEach(variable => state.opts.extra.storedImports[variable] = filename);
+  }
+
+  function storeRelayContainerFragments(state, name, fragments) {
+    state.opts.extra.relayContainerFragments = state.opts.extra.relayContainerFragments || {};
+    state.opts.extra.relayContainerFragments[name] = fragments;
+  }
+
+  function extendsReactComponent(node) {
+    if (!node || !t.isClassDeclaration(node)) {
+      return false;
+    }
+
+    const superClass = node.superClass;
+    return superClass && superClass.object.name === "React" && superClass.property.name === "Component";
+  }
+
+  function isTypeImport(node) {
+    return t.isImportDeclaration(node) && (node.importKind === "type" || node.importKind === "typeof");
+  }
+
+  function parseImport(node, currentFilename) {
+    if (!t.isImportDeclaration(node)) {
+      return null;
+    }
+
+    if (!currentFilename) {
+      throw new Error("Cannot parse import if there is no current file");
+    }
+
+    const variables = node.specifiers.map(specifier => specifier.local.name);
+    const importFile = node.source.value;
+    let filename = "";
+    if (importFile[0] === ".") {
+      const importFileName = path.parse(importFile).name;
+      const dir = path.dirname(path.resolve(path.dirname(currentFilename), importFile));
+      const files = fs.readdirSync(dir).filter(file => {
+        const { name } = path.parse(file);
+        return name === importFileName;
+      });
+      filename = path.resolve(dir, files[0]);
+    } else {
+      filename = require.resolve(importFile);
+    }
+
+    return { filename, variables };
+  }
+
+  function parseReactProps(self, node) {
+    if (!t.isClassProperty(node)) {
+      return null;
+    }
+
+    if (node.key.name !== "props") {
+      return null;
+    }
+
+    const typeAnnotation = node.typeAnnotation && node.typeAnnotation.typeAnnotation;
+    if (!typeAnnotation || !t.isGenericTypeAnnotation(typeAnnotation)) {
+      return null;
+    }
+
+    const classDec = self.findParent(p => t.isClassDeclaration(p));
+    if (!extendsReactComponent(classDec && classDec.node)) {
+      return null;
+    }
+
+    const className = classDec.node.id.name;
+    const propType = typeAnnotation.id.name;
+
+    return { className, propType };
+  }
+
+  // parse a file with the provided visitor
+  function parseFile(filename, visitor, scope) {
+    const babel = require("babel-core");
+    const program = babel.parse(fs.readFileSync(filename, "utf8"));
+
+    babel.traverse(program, visitor, scope, program);
+  }
+
   return new Plugin("flow-relay-query", {
     visitor: {
       TypeAlias(node, parent, scope, state) {
         storeTypeAlias(node, state);
       },
 
+      JSXElement(node, parent, scope, state) {
+        const name = t.isJSXIdentifier(node.openingElement.name) && node.openingElement.name.name;
+        const imports = state.opts.extra.storedImports || {};
+        const filename = imports[name];
+        if (filename) {
+          const visitor = {
+            CallExpression(n) {
+              if (this.get("callee").matchesPattern("Relay.createContainer")) {
+                const reactComponentName = n.arguments[0].name;
+                const fragments = n.arguments[1].properties.filter(_ => _.key.name === "fragments");
+                const fragmentNames = fragments.length === 1 ? fragments[0].value.properties.map(_ => _.key.name) : [];
+                storeRelayContainerFragments(state, reactComponentName, fragmentNames);
+              }
+            }
+          };
+          parseFile(filename, visitor, scope);
+        }
+      },
+
       ClassProperty(node, parent, scope, state) {
-        if (node.key.name !== "props") {
-          return;
+        const { className, propType } = parseReactProps(this, node) || {};
+        if (className && propType) {
+          storeClassPropTypes(state, className, propType);
         }
-
-        const typeAnnotation = node.typeAnnotation && node.typeAnnotation.typeAnnotation;
-        if (!typeAnnotation || !t.isGenericTypeAnnotation(typeAnnotation)) {
-          return;
-        }
-
-        const classDec = this.findParent(p => t.isClassDeclaration(p));
-        const superClass = classDec && classDec.node && classDec.node.superClass;
-        if (!superClass || superClass.object.name !== "React" || superClass.property.name !== "Component") {
-          return;
-        }
-
-        const className = classDec.node.id.name;
-        const propType = typeAnnotation.id.name;
-
-        storeClassPropTypes(state, className, propType);
       },
 
       ImportDeclaration(node, parent, scope, state) {
+        const typeImport = isTypeImport(node);
+
+        // track imports for use later
+        if (!typeImport) {
+          const { filename, variables } = parseImport(node, state.opts.filename) || {};
+          storeImports(state, filename, variables);
+        }
+
         // handle imported types
-        if (node.importKind === "type" || node.importKind === "typeof") {
-          const typeNames = node.specifiers.map(specifier => specifier.local.name);
-          const filename = state.opts.filename;
-
-          if (!filename) {
-            throw new Error(`Imported types ${typeNames.join(", ")} but there is no current file`);
-          }
-
-          const importFile = node.source.value;
-          const importFilename = path.resolve(path.dirname(filename), `${importFile}.js`);
-
-          // hack to get the imported type
-          const babel = require("babel-core");
-          const program = babel.parse(fs.readFileSync(importFilename, "utf8"));
+        if (typeImport) {
+          const { filename, variables } = parseImport(node, state.opts.filename) || {};
 
           const visitor = {
             TypeAlias(n) {
               const typeName = n.id.name;
-              if (typeNames.indexOf(typeName) >= 0) {
+              if (variables.indexOf(typeName) >= 0) {
                 storeTypeAlias(n, state);
               }
             }
           };
-          babel.traverse(program, visitor, null, program);
+          parseFile(filename, visitor, null);
         }
 
         // remove the marker function import
@@ -144,7 +227,7 @@ export default function({ Plugin, types: t }: Object): PluginClass {
 
       CallExpression(node, parent, scope, state) {
         if (!t.isIdentifier(node.callee, { name: generateFragmentFromPropsFunctionName })) {
-          return this;
+          return;
         }
 
         const relayCreateContainer = this.findParent(p => {
@@ -152,7 +235,7 @@ export default function({ Plugin, types: t }: Object): PluginClass {
         });
 
         if (!relayCreateContainer) {
-          return this;
+          return;
         }
 
         const reactClassName = relayCreateContainer.node.arguments[0].name;
@@ -166,39 +249,51 @@ export default function({ Plugin, types: t }: Object): PluginClass {
           throw new Error(`There is no flow type with name ${typeName}`);
         }
 
-        const typeKey = t.isProperty(parent) && parent.key.name;
+        const fragmentKey = t.isProperty(parent) && parent.key.name;
         const typeProperties = type.right.properties;
 
         let typeAtKey = null;
         for (let i = 0; i < typeProperties.length; i++) {
           const typeProperty = typeProperties[i];
-          if (t.isObjectTypeProperty(typeProperty) && typeProperty.key.name === typeKey) {
+          if (t.isObjectTypeProperty(typeProperty) && typeProperty.key.name === fragmentKey) {
             typeAtKey = typeProperty.value;
           }
         }
 
         if (!typeAtKey) {
-          throw new Error(`There is no property named '${typeKey}' in flow type ${typeName}`);
+          throw new Error(`There is no property named '${fragmentKey}' in flow type ${typeName}`);
         }
 
-        if (!t.isObjectTypeAnnotation(typeAtKey)) {
-          throw new Error(`Flow type ${typeName}.${typeKey} is not an object`);
-        }
-
-        const obj = convertFlowObjectTypeAnnotation(typeAtKey);
+        const obj = t.isObjectTypeAnnotation(typeAtKey) ? convertFlowObjectTypeAnnotation(typeAtKey) : {};
         const graphQlQueryBody = convertToGraphQLString(obj);
 
-        const fragmentName = node.arguments[1] && node.arguments[1].value || uppercaseFirstChar(typeKey);
-        const graphQlQuery = "\n" +
-          "fragment on " + fragmentName + " {\n" +
-          graphQlQueryBody + "\n" +
-          "}\n";
+        const childRelayContainers = state.opts.extra.relayContainerFragments || {};
+        const childRelayContainersForFragment = Object.keys(childRelayContainers).reduce((c, name) => {
+          const fragmentKeys = childRelayContainers[name];
+          if (fragmentKeys.indexOf(fragmentKey) >= 0) {
+            c.push(name);
+          }
+          return c;
+        }, []);
 
-        const relayQl = t.taggedTemplateExpression(
-          t.memberExpression(t.identifier("Relay"), t.identifier("QL")),
-          t.templateLiteral([t.templateElement({ cooked: graphQlQuery, raw: graphQlQuery })], [])
-        );
-        return t.arrowFunctionExpression([], relayQl);
+        const fragmentName = node.arguments[1] && node.arguments[1].value || uppercaseFirstChar(fragmentKey);
+        let graphQlQuery = "\n" +
+          "fragment on " + fragmentName + " {\n" +
+          graphQlQueryBody;
+        const graphQlQueryEnd = "\n}\n";
+
+        if (childRelayContainersForFragment.length > 0) {
+          if (graphQlQueryBody) {
+            graphQlQuery = graphQlQuery + ",\n  ";
+          }
+
+          graphQlQuery = graphQlQuery + childRelayContainersForFragment
+            .map(name => "${" + name + ".getFragment('" + fragmentKey + "')}")
+            .join(",\n  ");
+        }
+        graphQlQuery = graphQlQuery + graphQlQueryEnd;
+
+        this.replaceWithSourceString("() => Relay.QL`" + graphQlQuery + "`");
       }
     }
   });

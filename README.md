@@ -10,7 +10,7 @@ npm install --save-dev babel-plugin-flow-relay-query
 
 ## Usage
 
-Instead of importing _babel-relay-plugin_, import _babel-plugin-flow-relay-query_
+Instead of importing ```babel-relay-plugin```, import ```babel-plugin-flow-relay-query```
 
 Replace
 
@@ -25,13 +25,13 @@ var getBabelRelayPlugin = require("babel-plugin-flow-relay-query");
 
 ## Example
 
-Create a marker function called _generateFragmentFromProps_
+Create a marker function called ```generateFragmentFromProps```
 
 ```javascript
-function generateFragmentFromProps(fragmentName?: string) {}
+function generateFragmentFromProps(fragmentName?: string): Function {}
 ```
 
-If _fragmentName_ is not provided then it will default to the key in the fragments object, capitalized.
+If ```fragmentName``` is not provided then it will default to the key in the fragments object, capitalized.
 
 ```javascript
 import generateFragmentFromProps from "./generateFragmentFromProps";
@@ -51,7 +51,17 @@ type ArticleProps = {
 
 class Article extends React.Component {
   props: ArticleProps;
-  ...
+  
+  render() {
+    const { article } = this.props;
+    return (
+      <div>
+        <ArticleTitle article={article} />
+        <div>{article.author.name} [{article.author.email}]</div>
+        <div>{article.content})</div>
+      </div>
+    );
+  }
 }
 
 export default Relay.createContainer(Article, {
@@ -74,7 +84,8 @@ export default Relay.createContainer(Article, {
         author {
           name,
           email
-        }
+        },
+        ${ArticleTitle.getFragment("article")}
       }
     `
   }
