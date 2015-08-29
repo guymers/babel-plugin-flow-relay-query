@@ -15,8 +15,8 @@
 
   "scripts": {
     "check": "eslint --ext .js .",
-    "build": "babel-plugin build",
-    "push": "babel-plugin publish",
+    "build": "rm -rf ./lib && babel-plugin build",
+    "do-publish": "npm run check && npm run build && npm test && npm publish",
     "test": "mocha"
   },
 
