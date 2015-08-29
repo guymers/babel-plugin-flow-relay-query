@@ -109,7 +109,11 @@ export default function({ Plugin, types: t }: Object): PluginClass {
     }
 
     const variables = node.specifiers.map(specifier => specifier.local.name);
-    const importFile = node.source.value;
+    let importFile = node.source.value;
+    if (importFile === ".") {
+      importFile = "./index";
+    }
+
     let filename = "";
     if (importFile[0] === ".") {
       const importFileName = path.parse(importFile).name;
