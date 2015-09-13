@@ -17,7 +17,6 @@ declare class PluginClass {
 }
 
 export default function({ Plugin, types: t }: Object): PluginClass {
-
   function flowTypeAnnotationToString(type) {
     if (t.isStringTypeAnnotation(type)) {
       return "string";
