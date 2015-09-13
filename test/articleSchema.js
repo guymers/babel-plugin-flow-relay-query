@@ -27,11 +27,28 @@ const articleType = new GraphQLObjectType({
   })
 });
 
+const blahType = new GraphQLObjectType({
+  name: "Blah",
+  fields: () => ({
+    id: { type: new GraphQLNonNull(GraphQLString) },
+    title: { type: new GraphQLNonNull(GraphQLString) },
+    content: { type: new GraphQLNonNull(GraphQLString) },
+  })
+});
+
 const queryType = new GraphQLObjectType({
   name: "Query",
   fields: () => ({
     article: {
       type: articleType,
+      args: {
+        id: {
+          type: new GraphQLNonNull(GraphQLString),
+        },
+      },
+    },
+    blah: {
+      type: blahType,
       args: {
         id: {
           type: new GraphQLNonNull(GraphQLString),

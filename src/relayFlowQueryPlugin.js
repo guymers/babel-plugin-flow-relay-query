@@ -272,7 +272,7 @@ export default function({ Plugin, types: t }: Object): PluginClass {
           return c;
         }, []);
 
-        const fragmentName = node.arguments[1] && node.arguments[1].value || uppercaseFirstChar(fragmentKey);
+        const fragmentName = node.arguments[0] && node.arguments[0].value || uppercaseFirstChar(fragmentKey);
         let graphQlQuery = "\n" +
           "fragment on " + fragmentName + " {\n" +
           graphQlQueryBody;
