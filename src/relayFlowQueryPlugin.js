@@ -17,13 +17,6 @@ declare class PluginClass {
 }
 
 export default function({ Plugin, types: t }: Object): PluginClass {
-  // t.templateElement does not pass args
-  // https://github.com/babel/babel/blob/master/packages/babel/src/types/definitions/es2015.js#L123
-  const originalTemplateElement = t.templateElement;
-  t.templateElement = (value, tail = true) => {
-    const templateElement = originalTemplateElement.apply(this, arguments);
-    return Object.assign({}, templateElement, { value, tail });
-  };
 
   function flowTypeAnnotationToString(type) {
     if (t.isStringTypeAnnotation(type)) {
