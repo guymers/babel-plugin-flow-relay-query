@@ -78,6 +78,10 @@ export default function({ Plugin, types: t }: Object): PluginClass {
     state.opts.extra.relayContainerFragments[name] = fragments;
   }
 
+  function isPluginActive(state) {
+    return state.opts.extra.relayFlowQueryPluginActive;
+  }
+
   function extendsReactComponent(node) {
     if (!node || !t.isClassDeclaration(node)) {
       return false;
@@ -162,10 +166,18 @@ export default function({ Plugin, types: t }: Object): PluginClass {
   return new Plugin("flow-relay-query", {
     visitor: {
       TypeAlias(node, parent, scope, state) {
+        if (!isPluginActive(state)) {
+          return;
+        }
+
         storeTypeAlias(node, state);
       },
 
       JSXElement(node, parent, scope, state) {
+        if (!isPluginActive(state)) {
+          return;
+        }
+
         const name = t.isJSXIdentifier(node.openingElement.name) && node.openingElement.name.name;
         const imports = state.opts.extra.storedImports || {};
         const filename = imports[name];
@@ -185,6 +197,10 @@ export default function({ Plugin, types: t }: Object): PluginClass {
       },
 
       ClassProperty(node, parent, scope, state) {
+        if (!isPluginActive(state)) {
+          return;
+        }
+
         const { className, propType } = parseReactComponentClass(this, node) || {};
         if (className && propType) {
           storeComponentPropType(state, className, propType);
@@ -221,11 +237,16 @@ export default function({ Plugin, types: t }: Object): PluginClass {
         }).length > 0;
 
         if (remove) {
+          state.opts.extra.relayFlowQueryPluginActive = true;
           this.dangerouslyRemove();
         }
       },
 
       ArrowFunctionExpression(node, parent, scope, state) {
+        if (!isPluginActive(state)) {
+          return;
+        }
+
         const functionName = parent.id && parent.id.name;
 
         if (functionName && node.params.length === 1) {
@@ -240,6 +261,10 @@ export default function({ Plugin, types: t }: Object): PluginClass {
       },
 
       CallExpression(node, parent, scope, state) {
+        if (!isPluginActive(state)) {
+          return;
+        }
+
         if (!t.isIdentifier(node.callee, { name: generateFragmentFromPropsFunctionName })) {
           return;
         }
