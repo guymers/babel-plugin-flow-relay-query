@@ -63,9 +63,9 @@ export default function({ Plugin, types: t }: Object): PluginClass {
     state.opts.extra.flowTypes[node.id.name] = node;
   }
 
-  function storeClassPropTypes(state, className, propType) {
-    state.opts.extra.classPropTypes = state.opts.extra.classPropTypes || {};
-    state.opts.extra.classPropTypes[className] = propType;
+  function storeComponentPropType(state, componentName, propType) {
+    state.opts.extra.componentPropTypes = state.opts.extra.componentPropTypes || {};
+    state.opts.extra.componentPropTypes[componentName] = propType;
   }
 
   function storeImports(state, filename, variables) {
@@ -122,7 +122,7 @@ export default function({ Plugin, types: t }: Object): PluginClass {
     return { filename, variables };
   }
 
-  function parseReactProps(self, node) {
+  function parseReactComponentClass(self, node) {
     if (!t.isClassProperty(node)) {
       return null;
     }
@@ -155,6 +155,10 @@ export default function({ Plugin, types: t }: Object): PluginClass {
     babel.traverse(program, visitor, scope, program);
   }
 
+  function isRelayCreateContainer(node) {
+    return node.get("callee").matchesPattern("Relay.createContainer");
+  }
+
   return new Plugin("flow-relay-query", {
     visitor: {
       TypeAlias(node, parent, scope, state) {
@@ -168,7 +172,7 @@ export default function({ Plugin, types: t }: Object): PluginClass {
         if (filename) {
           const visitor = {
             CallExpression(n) {
-              if (this.get("callee").matchesPattern("Relay.createContainer")) {
+              if (isRelayCreateContainer(this)) {
                 const reactComponentName = n.arguments[0].name;
                 const fragments = n.arguments[1].properties.filter(_ => _.key.name === "fragments");
                 const fragmentNames = fragments.length === 1 ? fragments[0].value.properties.map(_ => _.key.name) : [];
@@ -181,9 +185,9 @@ export default function({ Plugin, types: t }: Object): PluginClass {
       },
 
       ClassProperty(node, parent, scope, state) {
-        const { className, propType } = parseReactProps(this, node) || {};
+        const { className, propType } = parseReactComponentClass(this, node) || {};
         if (className && propType) {
-          storeClassPropTypes(state, className, propType);
+          storeComponentPropType(state, className, propType);
         }
       },
 
@@ -221,23 +225,34 @@ export default function({ Plugin, types: t }: Object): PluginClass {
         }
       },
 
+      ArrowFunctionExpression(node, parent, scope, state) {
+        const functionName = parent.id && parent.id.name;
+
+        if (functionName && node.params.length === 1) {
+          let typeAnnotation = node.params[0].typeAnnotation;
+          typeAnnotation = typeAnnotation && typeAnnotation.typeAnnotation;
+
+          if (typeAnnotation && t.isGenericTypeAnnotation(typeAnnotation)) {
+            const propType = typeAnnotation.id.name;
+            storeComponentPropType(state, functionName, propType);
+          }
+        }
+      },
+
       CallExpression(node, parent, scope, state) {
         if (!t.isIdentifier(node.callee, { name: generateFragmentFromPropsFunctionName })) {
           return;
         }
 
-        const relayCreateContainer = this.findParent(p => {
-          return t.isCallExpression(p) && p.get("callee").matchesPattern("Relay.createContainer");
-        });
-
+        const relayCreateContainer = this.findParent(p => t.isCallExpression(p) && isRelayCreateContainer(p));
         if (!relayCreateContainer) {
           return;
         }
 
-        const reactClassName = relayCreateContainer.node.arguments[0].name;
-        const typeName = state.opts.extra.classPropTypes && state.opts.extra.classPropTypes[reactClassName];
+        const reactComponentName = relayCreateContainer.node.arguments[0].name;
+        const typeName = state.opts.extra.componentPropTypes && state.opts.extra.componentPropTypes[reactComponentName];
         if (!typeName) {
-          throw new Error(`React class ${reactClassName} does not have flow typed props`);
+          throw new Error(`React component ${reactComponentName} does not have flow typed props`);
         }
 
         const type = state.opts.extra.flowTypes && state.opts.extra.flowTypes[typeName];
