@@ -35,7 +35,7 @@ function test(folder, options, expectedFile) {
 }
 
 describe("", () => {
-  for (const { folder, name }  of tests) {
+  for (const { folder, name } of tests) {
     it(name, () => test(folder, babelOptions, "expected.js"));
     it("name - combined", () => test(folder, itBabelOptions, "expected_combined.js"));
   }

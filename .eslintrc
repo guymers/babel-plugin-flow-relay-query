@@ -11,10 +11,10 @@
   },
 
   "rules": {
-    "quotes": [2, "double"],
-    "curly": [2, "all"],
-    "comma-dangle": [0],
-    "spaced-comment": [0],
+    "quotes": [2, "double"], // single quotes are for characters
+    "curly": [2, "all"], // curly brackets for all statements
+    "comma-dangle": 0, // it just looks so wrong...
+    "id-length": 0, // name your variables whatever you want
 
     "react/prop-types": 0 // handled by Flow
   }

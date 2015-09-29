@@ -4,7 +4,7 @@
 import fs from "fs";
 import path from "path";
 import schema from "./articleSchema";
-import { graphql }  from "graphql";
+import { graphql } from "graphql";
 import { introspectionQuery } from "graphql/utilities";
 
 async () => {

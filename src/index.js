@@ -2,7 +2,7 @@
 import getBabelRelayPlugin from "babel-relay-plugin";
 import relayFlowQueryPlugin from "./relayFlowQueryPlugin";
 
-export default function getRelayFlowQueryPlugin(schemaProvider/*: Object | Function*/)/*: Function*/ {
+export default function getRelayFlowQueryPlugin(schemaProvider: Object|Function): Function {
   const babelRelayPlugin = getBabelRelayPlugin(schemaProvider);
 
   return function relayQueryGroupPlugin(babel) {
