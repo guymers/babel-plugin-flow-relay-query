@@ -33,25 +33,25 @@ export default Relay.createContainer(Article, {
     article: () => (function () {
       var GraphQL = Relay.QL.__GraphQL;
       return new GraphQL.QueryFragment("Source", "Article", [new GraphQL.Field("title", null, null, null, null, null, {
-        "parentType": "Article"
+        parentType: "Article"
       }), new GraphQL.Field("posted", null, null, null, null, null, {
-        "parentType": "Article"
+        parentType: "Article"
       }), new GraphQL.Field("content", null, null, null, null, null, {
-        "parentType": "Article"
+        parentType: "Article"
       }), new GraphQL.Field("author", [new GraphQL.Field("name", null, null, null, null, null, {
-        "parentType": "Author"
+        parentType: "Author"
       }), new GraphQL.Field("email", null, null, null, null, null, {
-        "parentType": "Author"
+        parentType: "Author"
       }), new GraphQL.Field("id", null, null, null, null, null, {
-        "parentType": "Author",
-        "generated": true,
-        "requisite": true
+        parentType: "Author",
+        generated: true,
+        requisite: true
       })], null, null, null, null, {
-        "parentType": "Article"
+        parentType: "Article"
       }), new GraphQL.Field("id", null, null, null, null, null, {
-        "parentType": "Article",
-        "generated": true,
-        "requisite": true
+        parentType: "Article",
+        generated: true,
+        requisite: true
       })]);
     })()
   }
