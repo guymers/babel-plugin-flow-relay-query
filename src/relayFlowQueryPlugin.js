@@ -118,7 +118,9 @@ export default function({ Plugin, types: t }: Object): PluginClass {
         const { name } = path.parse(file);
         return name === importFileName;
       });
-      filename = path.resolve(dir, files[0]);
+      if (files.length === 1) {
+        filename = path.resolve(dir, files[0]);
+      }
     } else {
       filename = require.resolve(importFile);
     }
@@ -213,22 +215,26 @@ export default function({ Plugin, types: t }: Object): PluginClass {
         // track imports for use later
         if (!typeImport) {
           const { filename, variables } = parseImport(node, state.opts.filename) || {};
-          storeImports(state, filename, variables);
+          if (filename) {
+            storeImports(state, filename, variables);
+          }
         }
 
         // handle imported types
         if (typeImport) {
           const { filename, variables } = parseImport(node, state.opts.filename) || {};
 
-          const visitor = {
-            TypeAlias(n) {
-              const typeName = n.id.name;
-              if (variables.indexOf(typeName) >= 0) {
-                storeTypeAlias(n, state);
+          if (filename) {
+            const visitor = {
+              TypeAlias(n) {
+                const typeName = n.id.name;
+                if (variables.indexOf(typeName) >= 0) {
+                  storeTypeAlias(n, state);
+                }
               }
-            }
-          };
-          parseFile(filename, visitor, null);
+            };
+            parseFile(filename, visitor, null);
+          }
         }
 
         // remove the marker function import
