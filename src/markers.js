@@ -1,4 +1,2 @@
 /* @flow */
-import generateFragmentFromProps from "./generateFragmentFromProps";
-
-export { generateFragmentFromProps };
+export { default as generateFragmentFromProps } from "./generateFragmentFromProps";

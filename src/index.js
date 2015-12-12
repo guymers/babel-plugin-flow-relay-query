@@ -1,18 +1,14 @@
 /* @flow */
 import getBabelRelayPlugin from "babel-relay-plugin";
-import relayFlowQueryPlugin from "./relayFlowQueryPlugin";
+import flowRelayQueryPlugin from "./flowRelayQueryPlugin";
 
-export default function getRelayFlowQueryPlugin(schemaProvider: Object|Function): Function {
+export default function (schemaProvider: Object|Function): Function {
   const babelRelayPlugin = getBabelRelayPlugin(schemaProvider);
 
-  return function relayQueryGroupPlugin(babel) {
-    const visitors = [];
-    visitors.push(babelRelayPlugin(babel).visitor);
-    visitors.push(relayFlowQueryPlugin(babel).visitor);
-
-    const { traverse } = require("babel-core");
-    const mergedVisitors = traverse.visitors.merge(visitors);
-
-    return new babel.Plugin("relay-query-group", { visitor: mergedVisitors });
+  return function plugin(babel) {
+    return {
+      inherits: babelRelayPlugin(babel),
+      ...flowRelayQueryPlugin(babel)
+    };
   };
 }

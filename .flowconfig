@@ -1,10 +1,22 @@
 [include]
+./node_modules/fbjs/flow/include
+./node_modules/react
 
 [ignore]
+.*/babel-plugin-flow-relay-query/lib/.*
+.*/babel-plugin-flow-relay-query/test/.*
+
 .*/node_modules/fbjs/flow/include/.*
+.*/node_modules/react/.*
+
+.*/node_modules/babel-.*
+.*/node_modules/babylon/.*
 .*/node_modules/eslint.*/.*
-.*/lib/.*
 
 [libs]
+./flow/lib
+./node_modules/fbjs/flow/lib
 
 [options]
+module.system=haste
+munge_underscores=true
