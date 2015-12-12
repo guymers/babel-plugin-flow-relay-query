@@ -14,7 +14,7 @@ type Expression =
 
 type ArrowFunctionExpression = {
   type: "ArrowFunctionExpression";
-  typeAnnotation: ?any;
+  typeAnnotation: ?TypeTypeAnnotation;
   generator: boolean;
   expression: boolean;
   params: Array<any>;
@@ -62,7 +62,7 @@ type JSXClosingElement = {
 
 type TypeAnnotation = {
   type: "TypeAnnotation";
-  typeAnnotation?: TypeTypeAnnotation;
+  typeAnnotation: ?TypeTypeAnnotation;
 }
 
 type GenericTypeAnnotation = {
@@ -103,6 +103,10 @@ type ObjectTypeProperty = {
   optional: boolean;
 }
 
+type VoidTypeAnnotation = {
+  type: "VoidTypeAnnotation";
+}
+
 
 type ClassProperty = {
   type: "ClassProperty";
@@ -114,6 +118,18 @@ type ClassDeclaration = {
   type: "ClassDeclaration";
   id: Identifier;
   superClass: ?Expression;
+  superTypeParameters: ?TypeParameterInstantiation;
+  body: ClassBody;
+}
+
+type ClassBody = {
+  type: "ClassBody";
+  body: Array<AstNode>;
+}
+
+type TypeParameterInstantiation = {
+  type: "TypeParameterInstantiation";
+  params: Array<GenericTypeAnnotation | VoidTypeAnnotation>; // probably more types are valid as well
 }
 
 type Literal = NullLiteral | StringLiteral | BooleanLiteral | NumericLiteral;

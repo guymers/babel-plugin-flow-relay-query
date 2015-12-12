@@ -30,7 +30,6 @@
 
     "babel-core": "^6.3.13",
     "babel-traverse": "^6.3.13",
-    "babel-types": "^6.3.13",
     "babel-plugin-syntax-async-functions": "^6.3.13",
     "babel-plugin-syntax-class-constructor-call": "^6.3.13",
     "babel-plugin-syntax-class-properties": "^6.3.13",

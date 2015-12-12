@@ -1,5 +1,4 @@
 /* @flow */
-import * as t from "babel-types";
 import type { NodePath } from "babel-traverse";
 
 export function isRelayCreateContainer(path: NodePath): boolean {
@@ -14,10 +13,13 @@ function extendsReactComponent(node: ClassDeclaration): boolean {
   return false;
 }
 
-function findGenericTypeAnnotation(node: AstNode): ?GenericTypeAnnotation {
-  const typeAnnotation = node.typeAnnotation && node.typeAnnotation.typeAnnotation;
-  if (typeAnnotation && t.isGenericTypeAnnotation(typeAnnotation) && typeAnnotation.type === "GenericTypeAnnotation") {
-    return typeAnnotation;
+function findClassProperty(node: ClassDeclaration, propertyName: string): ?ClassProperty {
+  const body = node.body.body;
+  for (let i = 0; i < body.length; i++) {
+    const bodyNode = body[i];
+    if (bodyNode.type === "ClassProperty" && bodyNode.key.name === propertyName) {
+      return bodyNode;
+    }
   }
   return null;
 }
@@ -27,28 +29,29 @@ type ReactComponentClassResult = {
   propType: string;
 };
 
-export function parseReactComponentClass(path: NodePath): ?ReactComponentClassResult {
-  const node = path.node;
-  if (node.type !== "ClassProperty") {
+export function parseReactComponentClass(node: ClassDeclaration): ?ReactComponentClassResult {
+  if (!extendsReactComponent(node)) {
     return null;
   }
 
-  if (node.key.name !== "props") {
-    return null;
+  const result: (n: GenericTypeAnnotation) => ReactComponentClassResult = n => {
+    return {
+      className: node.id.name,
+      propType: n.id.name
+    };
+  };
+
+  const typeParamAnnotation = node.superTypeParameters && node.superTypeParameters.params[1];
+  if (typeParamAnnotation && typeParamAnnotation.type === "GenericTypeAnnotation") {
+    return result(typeParamAnnotation);
   }
 
-  const genericTypeAnnotation = findGenericTypeAnnotation(node);
-  if (!genericTypeAnnotation) {
-    return null;
-  }
-
-  const classDeclarationPath = path.findParent(_ => t.isClassDeclaration(_.node));
-  const classDeclaration = classDeclarationPath && classDeclarationPath.node;
-  if (classDeclaration && classDeclaration.type === "ClassDeclaration" && extendsReactComponent(classDeclaration)) {
-    const className = classDeclaration.id.name;
-    const propType = genericTypeAnnotation.id.name;
-
-    return { className, propType };
+  const propsClassProperty = findClassProperty(node, "props");
+  if (propsClassProperty) {
+    const typeAnnotation = propsClassProperty.typeAnnotation && propsClassProperty.typeAnnotation.typeAnnotation;
+    if (typeAnnotation && typeAnnotation.type === "GenericTypeAnnotation") {
+      return result(typeAnnotation);
+    }
   }
 
   return null;

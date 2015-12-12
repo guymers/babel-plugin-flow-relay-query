@@ -1,5 +1,4 @@
 /* @flow */
-import * as t from "babel-types";
 import type { NodePath } from "babel-traverse";
 import type PluginPass from "babel-core/lib/transformation/plugin-pass";
 
@@ -10,10 +9,16 @@ import { toGraphQLQueryString } from "./utils/graphql";
 
 const GEN_FRAG_FROM_PROPS_NAME = "generateFragmentFromProps";
 
+type PluginInput = {
+  types: Object;
+};
 type PluginDef = {
   visitor: Object;
 }
-export default function (): PluginDef {
+
+export default function (plugin: PluginInput): PluginDef {
+  const t = plugin.types;
+
   type ActiveVisitorState = {
     imports: { [name: string]: string };
     flowTypes: { [name: string]: ObjectTypeAnnotation };
@@ -59,8 +64,12 @@ export default function (): PluginDef {
       }
     },
 
-    ClassProperty(path: NodePath, state: ActiveVisitorState) {
-      const { className, propType } = parseReactComponentClass(path) || {};
+    ClassDeclaration({ node }: NodePath, state: ActiveVisitorState) { // eslint-disable-line no-shadow
+      if (node.type !== "ClassDeclaration") {
+        return;
+      }
+
+      const { className, propType } = parseReactComponentClass(node) || {};
       if (className && propType) {
         state.componentPropTypes[className] = propType;
       }
@@ -77,7 +86,7 @@ export default function (): PluginDef {
         let typeAnnotation = node.params[0].typeAnnotation;
         typeAnnotation = typeAnnotation && typeAnnotation.typeAnnotation;
 
-        if (typeAnnotation && t.isGenericTypeAnnotation(typeAnnotation)) {
+        if (typeAnnotation && typeAnnotation.type === "GenericTypeAnnotation") {
           state.componentPropTypes[functionName] = typeAnnotation.id.name;
         }
       }
