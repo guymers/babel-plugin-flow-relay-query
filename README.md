@@ -1,6 +1,6 @@
 # babel-plugin-flow-relay-query
 
-Babel plugin which converts Flow types into Relay fragments.
+Babel 6 plugin which converts Flow types into Relay fragments.
 
 ## Installation
 
@@ -49,9 +49,7 @@ type ArticleProps = {
   }
 };
 
-class Article extends React.Component {
-  props: ArticleProps;
-  
+class Article extends React.Component<void, ArticleProps, void> {
   render() {
     const { article } = this.props;
     return (
@@ -90,4 +88,23 @@ export default Relay.createContainer(Article, {
     `
   }
 });
+```
+
+Also supports class properties and functional components:
+
+```javascript
+class Article extends React.Component {
+  props: ArticleProps;
+  ...
+}
+```
+
+```javascript
+const Article = ({ article }: ArticleProps) => (
+  <div>
+    <div>{article.title} ({article.posted})</div>
+    <div>{article.author.name} [{article.author.email}]</div>
+    <div>{article.content})</div>
+  </div>
+);
 ```
