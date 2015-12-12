@@ -1,6 +1,5 @@
 /* @flow */
 import type { NodePath } from "babel-traverse";
-import type PluginPass from "babel-core/lib/transformation/plugin-pass";
 
 import { isTypeImport, parseImport } from "./utils/import";
 import { isRelayCreateContainer, parseReactComponentClass } from "./utils/react";

@@ -21,8 +21,12 @@ declare module "babel-core/lib/helpers/resolve" {
   declare function exports(loc: string, relative?: string): ?string;
 }
 
-declare module "babel-core/lib/transformation/plugin-pass" {
-  declare var exports: typeof babelCore$PluginPass;
+declare class PluginPass extends babelCore$Store {
+  plugin: babelCore$Plugin;
+  file: babelCore$File;
+  opts: Object;
+
+  transform(): void;
 }
 
 declare class babelCore$Plugin extends babelCore$Store {
@@ -32,14 +36,6 @@ declare class babelCore$Plugin extends babelCore$Store {
   post: ?Function;
   pre: ?Function;
   visitor: Object;
-}
-
-declare class babelCore$PluginPass extends babelCore$Store {
-  plugin: babelCore$Plugin;
-  file: babelCore$File;
-  opts: Object;
-
-  transform(): void;
 }
 
 declare class babelCore$Store extends Map {
