@@ -1,0 +1,11 @@
+instrumentation:
+  root: src/
+  extensions:
+    - .js
+  include-all-sources: true
+  excludes:
+    - generateFragmentFromProps.js
+    - marker.js
+reporting:
+  reports:
+    - html

@@ -7,6 +7,8 @@ type ArticleProps = {
     title: string;
     posted: string;
     content: string;
+    views: number;
+    sponsored: bool;
 
     author: {
       name: string;
@@ -35,6 +37,8 @@ fragment on Article {
   title,
   posted,
   content,
+  views,
+  sponsored,
   author {
     name,
     email

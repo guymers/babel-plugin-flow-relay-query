@@ -3,7 +3,9 @@ import {
   GraphQLNonNull,
   GraphQLObjectType,
   GraphQLSchema,
-  GraphQLString
+  GraphQLString,
+  GraphQLInt,
+  GraphQLBoolean
 } from "graphql";
 
 const authorType = new GraphQLObjectType({
@@ -23,6 +25,8 @@ const articleType = new GraphQLObjectType({
     title: { type: new GraphQLNonNull(GraphQLString) },
     posted: { type: new GraphQLNonNull(GraphQLString) },
     content: { type: new GraphQLNonNull(GraphQLString) },
+    views: { type: new GraphQLNonNull(GraphQLInt) },
+    sponsored: { type: new GraphQLNonNull(GraphQLBoolean) },
     author: { type: authorType }
   })
 });

@@ -1,4 +1,5 @@
 node_modules/**
 flow/**
+coverage/**
 lib/**
 test/**/expected*.js

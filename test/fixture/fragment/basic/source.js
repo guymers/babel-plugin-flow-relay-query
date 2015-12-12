@@ -8,6 +8,8 @@ type ArticleProps = {
     title: string;
     posted: string;
     content: string;
+    views: number;
+    sponsored: boolean;
 
     author: {
       name: string;

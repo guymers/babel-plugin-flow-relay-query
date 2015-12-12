@@ -3,6 +3,7 @@
 ./node_modules/react
 
 [ignore]
+.*/babel-plugin-flow-relay-query/coverage/.*
 .*/babel-plugin-flow-relay-query/lib/.*
 .*/babel-plugin-flow-relay-query/test/.*
 

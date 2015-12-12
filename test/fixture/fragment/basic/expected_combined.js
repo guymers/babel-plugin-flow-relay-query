@@ -7,6 +7,8 @@ type ArticleProps = {
     title: string;
     posted: string;
     content: string;
+    views: number;
+    sponsored: bool;
 
     author: {
       name: string;
@@ -48,6 +50,16 @@ export default Relay.createContainer(Article, {
           metadata: {},
           type: "String"
         }, {
+          fieldName: "views",
+          kind: "Field",
+          metadata: {},
+          type: "Int"
+        }, {
+          fieldName: "sponsored",
+          kind: "Field",
+          metadata: {},
+          type: "Boolean"
+        }, {
           children: [{
             fieldName: "name",
             kind: "Field",
@@ -80,7 +92,7 @@ export default Relay.createContainer(Article, {
           },
           type: "String"
         }],
-        hash: "//5RjwCz",
+        hash: "yMYdtzX0",
         kind: "Fragment",
         metadata: {},
         name: "Source",
