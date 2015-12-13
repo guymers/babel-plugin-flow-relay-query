@@ -1,3 +1,7 @@
+## 0.6.2
+
+* Support inline wrapped React components being passed to Relay.createContainer
+
 ## 0.6.1
 
 * Fix invalid type import causing Babel to fail to start
