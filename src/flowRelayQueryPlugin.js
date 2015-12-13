@@ -106,15 +106,30 @@ export default function (plugin: PluginInput): PluginDef {
         return;
       }
 
-      const relayCreateContainerArgs = relayCreateContainer.node.arguments;
-      let reactComponentName = "";
-      const arg1 = relayCreateContainerArgs[0];
-      if (arg1 && arg1.type === "Identifier") {
-        reactComponentName = arg1.name;
+      const argPaths = relayCreateContainer.get("arguments");
+      const arg1Path = Array.isArray(argPaths) && argPaths[0];
+      if (!arg1Path) {
+        throw new Error(`Could not find first argument for Relay.createContainer`);
       }
-      const typeName = state.componentPropTypes[reactComponentName];
+
+      const identifierNames = [];
+      if (arg1Path.node.type === "Identifier") {
+        identifierNames.push(arg1Path.node.name);
+      } else {
+        arg1Path.traverse({
+          Identifier(identifierPath: NodePath) {
+            if (identifierPath.node.type === "Identifier") {
+              identifierNames.push(identifierPath.node.name);
+            }
+          }
+        });
+      }
+      const typeName = identifierNames.reduce((result, identifierName) => {
+        return result ? result : state.componentPropTypes[identifierName];
+      }, null);
       if (!typeName) {
-        throw new Error(`React component ${reactComponentName} does not have flow typed props`);
+        const identifierNamesStr = identifierNames.join(", ");
+        throw new Error(`Could not find flow prop types for possible react components [${identifierNamesStr}]`);
       }
 
       const type = state.flowTypes[typeName];
