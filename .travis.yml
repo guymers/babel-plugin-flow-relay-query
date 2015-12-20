@@ -3,5 +3,5 @@ node_js:
   - "5"
   - "4"
 script:
-  npm run check
-  npm test
+  - npm run check
+  - npm test
