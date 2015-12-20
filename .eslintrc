@@ -20,6 +20,8 @@
     "curly": [2, "all"], // curly brackets for all statements
     "comma-dangle": [2, "never"], // no trailing commas
     "id-length": 0, // name your variables whatever you want
+    // ideally this would be [2, "nofunc"] but that causes linting to exception
+    "no-use-before-define": [0], // allow functions to be underneath their caller
 
     "no-unused-vars": [2, { "varsIgnorePattern": "^_$" }],
 

@@ -1,29 +1,114 @@
 /* @flow */
-import isObject from "lodash.isobject";
 import { convertFlowObjectTypeAnnotation } from "./flow";
+import type {
+  FlowTypes,
+  FlowType
+} from "./types";
+import {
+  GraphQLObjectType,
+  GraphQLNonNull,
+  GraphQLScalarType
+} from "graphql";
+import type { GraphQLSchema } from "graphql";
 
-function objectToGraphQLString(obj: Object, level: number = 1): string {
-  const indentation = "  ".repeat(level);
+export function checkPropsObjectTypeMatchesSchema(
+  schema: GraphQLSchema,
+  fragmentName: string,
+  objectType: ObjectTypeProperty
+) {
+  const graphqlType = schema.getType(fragmentName);
+  if (!graphqlType || !(graphqlType instanceof GraphQLObjectType)) {
+    throw new Error(`There is no GraphQL object type named '${fragmentName}'`);
+  }
 
-  const strings = Object.keys(obj).reduce((parts, key) => {
-    const value = obj[key];
-    let str = key;
-    if (isObject(value)) {
-      str = str + " {\n" + objectToGraphQLString(value, level + 1) + "\n" + indentation + "}";
-    }
-    parts.push(indentation + str);
-    return parts;
-  }, []);
+  const typeAnnotation = objectType.value;
+  const flowTypes = typeAnnotation.type === "ObjectTypeAnnotation" ? convertFlowObjectTypeAnnotation(typeAnnotation) : {};
+  const graphqlTypes = convertGraphqlObjectType(graphqlType);
 
-  return strings.join(",\n");
+  const result = compareFlowTypes(flowTypes, graphqlTypes);
+  if (result.length > 0) {
+    const errors = result.map(r => {
+      return `Expected type '${r.expected}', actual type '${r.actual}' for path ${r.path.join(".")}`;
+    });
+    throw new Error(`Errors for fragment ${fragmentName}:\n` + errors.join("\n"));
+  }
 }
 
-const uppercaseFirstChar = str => str.charAt(0).toUpperCase() + str.slice(1);
+function convertGraphqlObjectType(objectType: GraphQLObjectType): FlowTypes {
+  const fields = objectType.getFields();
+  return Object.keys(fields).reduce((obj, key) => {
+    const field = fields[key];
+    obj[key] = graphqlFieldToString(field);
+    return obj;
+  }, {});
+}
+
+function graphqlFieldToString(field: Object): FlowType {
+  let nullable = true;
+  let graphqlType = field.type;
+  if (graphqlType instanceof GraphQLNonNull) {
+    nullable = false;
+    graphqlType = graphqlType.ofType;
+  }
+
+  if (graphqlType instanceof GraphQLObjectType) {
+    return {
+      type: "object",
+      nullable,
+      properties: convertGraphqlObjectType(graphqlType)
+    };
+  }
+
+  const flowTypeName = graphqlType instanceof GraphQLScalarType ? graphqlType.name : "any";
+  switch (flowTypeName) {
+    case "Boolean":
+      return { type: "boolean", nullable };
+    case "Int":
+    case "Float":
+      return { type: "number", nullable };
+    case "ID":
+    case "String":
+      return { type: "string", nullable };
+    default:
+      return { type: "any", nullable };
+  }
+}
+
+type CompareFlowTypesResult = { path: Array<string>, expected: string, actual: string };
+
+function compareFlowTypes(a: FlowTypes, b: FlowTypes, path: Array<string> = []): Array<CompareFlowTypesResult> {
+  const createPath = key => {
+    const pathCopy = path.slice();
+    pathCopy.push(key);
+    return pathCopy;
+  };
+
+  const typeToString: (type: FlowType) => string = type => (type.nullable ? "?" : "") + type.type;
+
+  const aKeys = Object.keys(a).sort();
+  return aKeys.reduce((result, key) => {
+    // babel relay plugin handles missing fields
+    if (b[key]) {
+      const aType = a[key];
+      const bType = b[key];
+
+      const actual = typeToString(aType);
+      const expected = typeToString(bType);
+
+      if (actual !== expected) {
+        result.push({ path: createPath(key), actual, expected });
+      } else if (aType.type === "object" && bType.type === "object") {
+        return result.concat(compareFlowTypes(aType.properties, bType.properties, createPath(key)));
+      }
+    }
+    return result;
+  }, []);
+}
 
 export function toGraphQLQueryString(
+  fragmentName: string,
   objectType: ObjectTypeProperty,
-  relayContainerFragments: { [name: string]: Array<string> },
-  fragmentName?: ?string
+  relayContainerFragments: { [name: string]: Array<string> }
 ): string {
   const fragmentKey = objectType.key.name;
   const typeAnnotation = objectType.value;
@@ -40,7 +125,7 @@ export function toGraphQLQueryString(
   }, []);
 
   let graphQlQuery = "\n" +
-    "fragment on " + (fragmentName || uppercaseFirstChar(fragmentKey)) + " {\n" +
+    "fragment on " + fragmentName + " {\n" +
     graphQlQueryBody;
   const graphQlQueryEnd = "\n}\n";
 
@@ -55,9 +140,21 @@ export function toGraphQLQueryString(
   }
   graphQlQuery = graphQlQuery + graphQlQueryEnd;
 
-// const buildRequire = template(`
-//   var IMPORT_NAME = require(SOURCE);
-// `);
-
   return "() => Relay.QL`" + graphQlQuery + "`";
+}
+
+function objectToGraphQLString(obj: { [key: string]: FlowType }, level: number = 1): string {
+  const indentation = "  ".repeat(level);
+
+  const strings = Object.keys(obj).reduce((parts, key) => {
+    const value = obj[key];
+    let str = key;
+    if (value.type === "object") {
+      str = str + " {\n" + objectToGraphQLString(value.properties, level + 1) + "\n" + indentation + "}";
+    }
+    parts.push(indentation + str);
+    return parts;
+  }, []);
+
+  return strings.join(",\n");
 }

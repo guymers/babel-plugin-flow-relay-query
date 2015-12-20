@@ -26,8 +26,6 @@
   },
 
   "dependencies": {
-    "lodash.isobject": "^3.0.0",
-
     "babel-core": "^6.3.13",
     "babel-traverse": "^6.3.13",
     "babel-plugin-syntax-async-functions": "^6.3.13",

@@ -27,7 +27,7 @@ const articleType = new GraphQLObjectType({
     content: { type: new GraphQLNonNull(GraphQLString) },
     views: { type: new GraphQLNonNull(GraphQLInt) },
     sponsored: { type: new GraphQLNonNull(GraphQLBoolean) },
-    author: { type: authorType }
+    author: { type: new GraphQLNonNull(authorType) }
   })
 });
 

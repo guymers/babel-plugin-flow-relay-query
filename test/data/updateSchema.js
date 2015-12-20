@@ -7,7 +7,7 @@ import schema from "./articleSchema";
 import { graphql } from "graphql";
 import { introspectionQuery } from "graphql/utilities";
 
-async function updateSchema() {
+(async () => {
   const result = await graphql(schema, introspectionQuery);
   if (result.errors) {
     console.error("ERROR: ", JSON.stringify(result.errors, null, 2));
@@ -17,6 +17,4 @@ async function updateSchema() {
       JSON.stringify(result, null, 2)
     );
   }
-}
-
-updateSchema();
+})();

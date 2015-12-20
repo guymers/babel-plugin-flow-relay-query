@@ -4,7 +4,8 @@ import path from "path";
 import glob from "glob";
 import assert from "assert";
 import { transformFileSync } from "babel-core";
-import flowRelayQueryPlugin from "../../src/flowRelayQueryPlugin";
+import createSchema from "../../src/createSchema";
+import createFlowRelayQueryPlugin from "../../src/flowRelayQueryPlugin";
 import pluginDef from "../../src";
 
 const schema = require("../data/articleSchema.json");
@@ -26,15 +27,20 @@ const createBabelOptions = plugin => ({
     plugin
   ]
 });
-const babelOptions = createBabelOptions(flowRelayQueryPlugin);
+const babelOptions = createBabelOptions(createFlowRelayQueryPlugin(createSchema(schema.data)));
 const itBabelOptions = createBabelOptions(pluginDef(schema.data));
 
 function test(folder, options, expectedFile) {
   const sourceFile = path.resolve(folder, "source.js");
-  const result = transformFileSync(sourceFile, options).code;
+  let result = "";
+  try {
+    result = transformFileSync(sourceFile, options).code;
+  } catch (e) {
+    result = e.message;
+  }
   const expected = fs.readFileSync(path.resolve(folder, expectedFile), "utf8");
 
-  assert.equal(result.trim(), expected.trim());
+  assert.equal(result.trim(), expected.trim().replace("{PROJECT_ROOT}", path.resolve(cwd, "../..")));
 }
 
 describe("", () => {
