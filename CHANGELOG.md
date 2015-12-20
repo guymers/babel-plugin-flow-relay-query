@@ -1,3 +1,7 @@
+## 0.6.3
+
+* Check prop Flow types against the GraphQL schema
+
 ## 0.6.2
 
 * Support inline wrapped React components being passed to Relay.createContainer
