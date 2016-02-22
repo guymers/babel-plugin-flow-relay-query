@@ -1,3 +1,7 @@
+## 0.7.0
+
+* Update to Relay 0.7
+
 ## 0.6.3
 
 * Check prop Flow types against the GraphQL schema
