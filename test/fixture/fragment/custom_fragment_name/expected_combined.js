@@ -45,9 +45,10 @@ export default Relay.createContainer(Article, {
           },
           type: "String"
         }],
+        id: "PLPDPwntlYN/:2",
         kind: "Fragment",
         metadata: {},
-        name: "Source",
+        name: "Source_ArticleRelayQL",
         type: "Blah"
       };
     }()

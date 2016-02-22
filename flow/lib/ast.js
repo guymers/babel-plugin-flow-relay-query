@@ -23,6 +23,9 @@ type ArrowFunctionExpression = {
 
 type CallExpression = {
   type: "CallExpression";
+  loc: {
+    start: Object;
+  };
   callee: Identifier;
   arguments: Array<Identifier | ObjectExpression>;
 }

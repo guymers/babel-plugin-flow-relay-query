@@ -36,7 +36,7 @@ export default Relay.createContainer(Article, {
   fragments: {
     article: () => function (RQL_0, RQL_1) {
       return {
-        children: [{
+        children: [].concat.apply([], [{
           fieldName: "title",
           kind: "Field",
           metadata: {},
@@ -73,7 +73,9 @@ export default Relay.createContainer(Article, {
           }],
           fieldName: "author",
           kind: "Field",
-          metadata: {},
+          metadata: {
+            canHaveSubselections: true
+          },
           type: "Author"
         }, {
           fieldName: "id",
@@ -83,10 +85,11 @@ export default Relay.createContainer(Article, {
             isRequisite: true
           },
           type: "String"
-        }, Relay.QL.__frag(RQL_0), Relay.QL.__frag(RQL_1)],
+        }, Relay.QL.__frag(RQL_0), Relay.QL.__frag(RQL_1)]),
+        id: "0JokS9PuArAS:1",
         kind: "Fragment",
         metadata: {},
-        name: "Source",
+        name: "Source_ArticleRelayQL",
         type: "Article"
       };
     }(ArticleTitle.getFragment('article'), ArticleBody.getFragment('article'))

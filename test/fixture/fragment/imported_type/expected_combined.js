@@ -58,7 +58,9 @@ export default Relay.createContainer(Article, {
           }],
           fieldName: "author",
           kind: "Field",
-          metadata: {},
+          metadata: {
+            canHaveSubselections: true
+          },
           type: "Author"
         }, {
           fieldName: "id",
@@ -69,9 +71,10 @@ export default Relay.createContainer(Article, {
           },
           type: "String"
         }],
+        id: "04RlbnTguWWG:3",
         kind: "Fragment",
         metadata: {},
-        name: "Source",
+        name: "Source_ArticleRelayQL",
         type: "Article"
       };
     }()

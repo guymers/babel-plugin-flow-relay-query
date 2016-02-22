@@ -38,9 +38,10 @@ export default Relay.createContainer(Article, {
           },
           type: "String"
         }],
+        id: "tWLwOLgXtM0V:4",
         kind: "Fragment",
         metadata: {},
-        name: "Source",
+        name: "Source_ArticleRelayQL",
         type: "Article"
       };
     }()

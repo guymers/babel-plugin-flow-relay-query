@@ -158,7 +158,13 @@ export default function (schema: GraphQLSchema): (plugin: PluginInput) => Plugin
 
         checkPropsObjectTypeMatchesSchema(schema, fragmentName, typeAtKey);
         const graphQlQuery = toGraphQLQueryString(fragmentName, typeAtKey, state.relayContainerFragments);
+
+        // relay needs a start location on the Relay.QL template string
+        const start = node.loc.start;
         path.replaceWithSourceString(graphQlQuery);
+        if (path.node.type === "ArrowFunctionExpression") {
+          path.node.body.loc = { start };
+        }
       }
     };
 

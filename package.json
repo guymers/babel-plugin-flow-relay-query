@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-flow-relay-query",
-  "version": "0.6.3",
+  "version": "0.7.0",
   "description": "Babel plugin which converts Flow types into Relay fragments",
   "keywords": [
     "babel-plugin", "relay", "flow"
@@ -41,8 +41,8 @@
     "babel-plugin-syntax-object-rest-spread": "^6.5.0",
     "babel-plugin-syntax-trailing-function-commas": "^6.5.0",
 
-    "babel-relay-plugin": "0.6.x",
-    "graphql": "0.4.x"
+    "babel-relay-plugin": "0.7.1",
+    "graphql": "^0.4.17"
   },
 
   "devDependencies": {
@@ -54,9 +54,9 @@
     "mocha": "2.4.5",
     "istanbul": "1.0.0-alpha.2",
     "glob": "7.0.0",
-    "react": "0.14.3",
-    "react-dom": "0.14.3",
-    "react-relay": "0.6.0",
+    "react": "0.14.7",
+    "react-dom": "0.14.7",
+    "react-relay": "0.7.1",
 
     "babel-eslint": "5.0.0",
     "eslint": "1.10.3",
