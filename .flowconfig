@@ -10,6 +10,17 @@
 .*/node_modules/fbjs/flow/include/.*
 .*/node_modules/react/.*
 
+// people who package their tests..
+.*/node_modules/.*/test/.*
+
+// unparsable json
+.*/node_modules/binary-extensions/binary-extensions.json
+.*/node_modules/builtin-modules/builtin-modules.json
+.*/node_modules/spdx-exceptions/index.json
+.*/node_modules/spdx-license-ids/spdx-license-ids.json
+.*/node_modules/url-regex/tlds.json
+
+// exclude files that will never be imported
 .*/node_modules/babel-.*
 .*/node_modules/babylon/.*
 .*/node_modules/eslint.*/.*
