@@ -27,10 +27,8 @@ export function checkPropsObjectTypeMatchesSchema(
 
   const result = compareFlowTypes(flowTypes, graphqlTypes);
   if (result.length > 0) {
-    const errors = result.map(r => {
-      return `Expected type '${r.expected}', actual type '${r.actual}' for path ${r.path.join(".")}`;
-    });
-    throw new Error(`Errors for fragment ${fragmentName}:\n` + errors.join("\n"));
+    const errors = result.map(r => `Expected type '${r.expected}', actual type '${r.actual}' for path ${r.path.join(".")}`);
+    throw new Error(`Errors for fragment ${fragmentName}:\n${errors.join("\n")}`);
   }
 }
 
@@ -38,8 +36,7 @@ function convertGraphqlObjectType(objectType: GraphQLObjectType): FlowTypes {
   const fields = objectType.getFields();
   return Object.keys(fields).reduce((obj, key) => {
     const field = fields[key];
-    obj[key] = graphqlFieldToString(field);
-    return obj;
+    return { ...obj, [key]: graphqlFieldToString(field) };
   }, {});
 }
 
@@ -124,23 +121,21 @@ export function toGraphQLQueryString(
     return c;
   }, []);
 
-  let graphQlQuery = "\n" +
-    "fragment on " + fragmentName + " {\n" +
-    graphQlQueryBody;
+  let graphQlQuery = `\nfragment on ${fragmentName} {\n${graphQlQueryBody}`;
   const graphQlQueryEnd = "\n}\n";
 
   if (childRelayContainersForFragment.length > 0) {
     if (graphQlQueryBody) {
-      graphQlQuery = graphQlQuery + ",\n  ";
+      graphQlQuery = `${graphQlQuery},\n  `;
     }
 
     graphQlQuery = graphQlQuery + childRelayContainersForFragment
-      .map(name => "${" + name + ".getFragment('" + fragmentKey + "')}")
+      .map(name => `\${${name}.getFragment('${fragmentKey}')}`)
       .join(",\n  ");
   }
   graphQlQuery = graphQlQuery + graphQlQueryEnd;
 
-  return "() => Relay.QL`" + graphQlQuery + "`";
+  return `() => Relay.QL\`${graphQlQuery}\``;
 }
 
 function objectToGraphQLString(obj: { [key: string]: FlowType }, level: number = 1): string {
@@ -150,7 +145,7 @@ function objectToGraphQLString(obj: { [key: string]: FlowType }, level: number =
     const value = obj[key];
     let str = key;
     if (value.type === "object") {
-      str = str + " {\n" + objectToGraphQLString(value.properties, level + 1) + "\n" + indentation + "}";
+      str = `${str} {\n${objectToGraphQLString(value.properties, level + 1)}\n${indentation}}`;
     }
     parts.push(indentation + str);
     return parts;

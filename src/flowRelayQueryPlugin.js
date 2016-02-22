@@ -1,4 +1,5 @@
 /* @flow */
+/* eslint no-param-reassign:0 */
 import type { NodePath } from "babel-traverse";
 
 import { isTypeImport, parseImport } from "./utils/import";
@@ -128,9 +129,10 @@ export default function (schema: GraphQLSchema): (plugin: PluginInput) => Plugin
             }
           });
         }
-        const typeName = identifierNames.reduce((result, identifierName) => {
-          return result ? result : state.componentPropTypes[identifierName];
-        }, null);
+        const typeName = identifierNames.reduce(
+          (result, identifierName) => result || state.componentPropTypes[identifierName],
+          null
+        );
         if (!typeName) {
           const identifierNamesStr = identifierNames.join(", ");
           throw new Error(`Could not find flow prop types for possible react components [${identifierNamesStr}]`);

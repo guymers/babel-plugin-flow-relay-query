@@ -34,12 +34,10 @@ export function parseReactComponentClass(node: ClassDeclaration): ?ReactComponen
     return null;
   }
 
-  const result: (n: GenericTypeAnnotation) => ReactComponentClassResult = n => {
-    return {
-      className: node.id.name,
-      propType: n.id.name
-    };
-  };
+  const result: (n: GenericTypeAnnotation) => ReactComponentClassResult = n => ({
+    className: node.id.name,
+    propType: n.id.name
+  });
 
   const typeParamAnnotation = node.superTypeParameters && node.superTypeParameters.params[1];
   if (typeParamAnnotation && typeParamAnnotation.type === "GenericTypeAnnotation") {

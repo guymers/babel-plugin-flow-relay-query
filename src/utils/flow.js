@@ -4,7 +4,7 @@ import type { FlowTypes } from "./types";
 function flowTypeAnnotationToString(type: TypeTypeAnnotation): string {
   switch (type.type) {
     case "NullableTypeAnnotation":
-      return "?" + flowTypeAnnotationToString(type.typeAnnotation);
+      return `?${flowTypeAnnotationToString(type.typeAnnotation)}`;
     case "BooleanTypeAnnotation":
       return "boolean";
     case "NumberTypeAnnotation":
@@ -22,17 +22,16 @@ export function convertFlowObjectTypeAnnotation(objectType: ObjectTypeAnnotation
     const key = property.key.name;
     const value = property.value;
     if (value.type === "ObjectTypeAnnotation") {
-      obj[key] = {
+      return { ...obj, [key]: {
         type: "object",
         nullable: property.optional,
         properties: convertFlowObjectTypeAnnotation(value)
-      };
-    } else {
-      obj[key] = {
-        type: flowTypeAnnotationToString(value),
-        nullable: property.optional
-      };
+      } };
     }
-    return obj;
+
+    return { ...obj, [key]: {
+      type: flowTypeAnnotationToString(value),
+      nullable: property.optional
+    } };
   }, {});
 }
