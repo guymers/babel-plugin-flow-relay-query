@@ -2,6 +2,7 @@
 import React from "react";
 import Relay from "react-relay";
 
+
 type ArticleProps = {
   article: {
     title: string;
@@ -23,7 +24,7 @@ class Article extends React.Component {
 
 export default Relay.createContainer(Article, {
   fragments: {
-    article: () => (function () {
+    article: () => function () {
       return {
         children: [{
           fieldName: "title",
@@ -44,12 +45,11 @@ export default Relay.createContainer(Article, {
           },
           type: "String"
         }],
-        hash: "cyQ1O/bM",
         kind: "Fragment",
         metadata: {},
         name: "Source",
         type: "Blah"
       };
-    })()
+    }()
   }
 });

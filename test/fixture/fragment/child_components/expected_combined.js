@@ -2,6 +2,7 @@
 import React from "react";
 import Relay from "react-relay";
 
+
 import ArticleBody from "./ArticleBody";
 import ArticleTitle from "./ArticleTitle";
 
@@ -33,7 +34,7 @@ class Article extends React.Component {
 
 export default Relay.createContainer(Article, {
   fragments: {
-    article: () => (function (RQL_0, RQL_1) {
+    article: () => function (RQL_0, RQL_1) {
       return {
         children: [{
           fieldName: "title",
@@ -83,12 +84,11 @@ export default Relay.createContainer(Article, {
           },
           type: "String"
         }, Relay.QL.__frag(RQL_0), Relay.QL.__frag(RQL_1)],
-        hash: "92O+21v6",
         kind: "Fragment",
         metadata: {},
         name: "Source",
         type: "Article"
       };
-    })(ArticleTitle.getFragment('article'), ArticleBody.getFragment('article'))
+    }(ArticleTitle.getFragment('article'), ArticleBody.getFragment('article'))
   }
 });

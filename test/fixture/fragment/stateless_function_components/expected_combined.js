@@ -2,6 +2,7 @@
 import React from "react";
 import Relay from "react-relay";
 
+
 type ArticleProps = {
   article: {
     title: string;
@@ -24,7 +25,7 @@ const Article = ({ article }: ArticleProps) => // eslint-disable-line no-shadow,
 
 export default Relay.createContainer(Article, {
   fragments: {
-    article: () => (function () {
+    article: () => function () {
       return {
         children: [{
           fieldName: "title",
@@ -74,12 +75,11 @@ export default Relay.createContainer(Article, {
           },
           type: "String"
         }],
-        hash: "//5RjwCz",
         kind: "Fragment",
         metadata: {},
         name: "Source",
         type: "Article"
       };
-    })()
+    }()
   }
 });

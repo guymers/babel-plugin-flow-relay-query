@@ -22,7 +22,7 @@ class Article extends React.Component {
 
 export default Relay.createContainer(Article, {
   fragments: {
-    article: () => (function () {
+    article: () => function () {
       return {
         children: [{
           fieldName: "title",
@@ -38,12 +38,11 @@ export default Relay.createContainer(Article, {
           },
           type: "String"
         }],
-        hash: "FBfajW4L",
         kind: "Fragment",
         metadata: {},
         name: "Source",
         type: "Article"
       };
-    })()
+    }()
   }
 });
