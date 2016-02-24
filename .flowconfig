@@ -15,12 +15,7 @@
 .*/node_modules/.*/test/.*
 
 // unparsable json
-.*/node_modules/binary-extensions/binary-extensions.json
-.*/node_modules/builtin-modules/builtin-modules.json
-.*/node_modules/spdx-exceptions/index.json
-.*/node_modules/spdx-license-ids/spdx-license-ids.json
-.*/node_modules/url-regex/tlds.json
-.*/node_modules/iconv-lite/encodings/tables/.*
+.*/node_modules/**/.*.json
 
 // exclude files that will never be imported
 .*/node_modules/babel-.*

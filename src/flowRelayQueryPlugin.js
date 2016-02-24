@@ -114,7 +114,7 @@ export default function (schema: GraphQLSchema): (plugin: PluginInput) => Plugin
         const argPaths = relayCreateContainer.get("arguments");
         const arg1Path = Array.isArray(argPaths) && argPaths[0];
         if (!arg1Path) {
-          throw new Error(`Could not find first argument for Relay.createContainer`);
+          throw new Error("Could not find first argument for Relay.createContainer");
         }
 
         const identifierNames = [];
@@ -198,7 +198,9 @@ export default function (schema: GraphQLSchema): (plugin: PluginInput) => Plugin
             };
             parseFile(filename, visitor, {});
           } else {
-            variables.forEach(variable => state.imports[variable] = filename);
+            variables.forEach(variable => {
+              state.imports[variable] = filename;
+            });
           }
         }
 
