@@ -38,7 +38,7 @@ export default Relay.createContainer(Article, {
           },
           type: "String"
         }],
-        id: "tWLwOLgXtM0V:4",
+        id: Relay.QL.__id(),
         kind: "Fragment",
         metadata: {},
         name: "Source_ArticleRelayQL",
