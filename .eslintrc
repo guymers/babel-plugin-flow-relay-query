@@ -22,8 +22,11 @@
     "no-unused-vars": [2, { "varsIgnorePattern": "^_$" }],
     "max-len": [2, 150, 2],
 
+    "no-duplicate-imports": 0, // doesnt work well when importing types
+
     "react/prop-types": 0, // handled by Flow
     "react/sort-comp": 0, // dont care
+    "react/prefer-stateless-function": 0,
 
     "flow-vars/define-flow-type": 1,
     "flow-vars/use-flow-type": 1

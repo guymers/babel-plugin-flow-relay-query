@@ -1,14 +1,13 @@
 [include]
-./node_modules/fbjs/lib
-./node_modules/react
-./node_modules/react-static-container/lib
 
 [ignore]
 .*/babel-plugin-flow-relay-query/coverage/.*
 .*/babel-plugin-flow-relay-query/lib/.*
 .*/babel-plugin-flow-relay-query/test/.*
 
-.*/node_modules/fbjs/flow/include/.*
+// uses non standard promise methods
+.*/node_modules/fbjs/.*
+
 .*/node_modules/react/.*
 
 // people who package their tests..
