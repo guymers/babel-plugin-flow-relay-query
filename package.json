@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-flow-relay-query",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "Babel plugin which converts Flow types into Relay fragments",
   "keywords": [
     "babel-plugin", "relay", "flow"
