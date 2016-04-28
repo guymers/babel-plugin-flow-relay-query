@@ -3,7 +3,7 @@
 import React from "react";
 import Relay from "react-relay";
 import generateFragmentFromProps from "../../../../src/generateFragmentFromProps";
-import NonexistentComponet from "./DoesNotExist";
+import NonexistentComponet from "./DoesNotExist"; // eslint-disable-line import/no-unresolved
 
 type ArticleProps = {
   article: {
