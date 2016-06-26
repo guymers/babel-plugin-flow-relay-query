@@ -41,8 +41,8 @@
     "babel-plugin-syntax-object-rest-spread": "^6.8.0",
     "babel-plugin-syntax-trailing-function-commas": "^6.8.0",
 
-    "babel-relay-plugin": "0.9.0",
-    "graphql": "^0.6.0"
+    "babel-relay-plugin": "0.9.1",
+    "graphql": "0.6.0"
   },
 
   "devDependencies": {
@@ -56,7 +56,7 @@
     "glob": "7.0.3",
     "react": "15.1.0",
     "react-dom": "15.1.0",
-    "react-relay": "0.9.0",
+    "react-relay": "0.9.1",
 
     "babel-eslint": "6.0.4",
     "eslint": "2.11.0",
