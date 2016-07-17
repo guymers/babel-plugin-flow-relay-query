@@ -1,3 +1,7 @@
+## 0.9.2
+
+* Update to Relay 0.9.2
+
 ## 0.9.1
 
 * Update to Relay 0.9.1
