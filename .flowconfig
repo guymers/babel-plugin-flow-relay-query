@@ -1,20 +1,11 @@
 [include]
 
 [ignore]
+.*/**/*.native.js
+
 .*/babel-plugin-flow-relay-query/coverage/.*
 .*/babel-plugin-flow-relay-query/lib/.*
 .*/babel-plugin-flow-relay-query/test/.*
-
-// uses non standard promise methods
-.*/node_modules/fbjs/.*
-
-.*/node_modules/react/.*
-
-// people who package their tests..
-.*/node_modules/.*/test/.*
-
-// unparsable json
-.*/node_modules/**/.*.json
 
 // exclude files that will never be imported
 .*/node_modules/babel-.*
@@ -27,6 +18,10 @@
 
 [options]
 module.system=haste
+
+esproposal.class_static_fields=enable
+esproposal.class_instance_fields=enable
+
 munge_underscores=true
 
 suppress_type=$FlowIssue
