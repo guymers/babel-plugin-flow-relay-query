@@ -10,6 +10,9 @@ function extendsReactComponent(node: ClassDeclaration): boolean {
   if (superClass && superClass.type === "MemberExpression") {
     return superClass.object.name === "React" && superClass.property.name === "Component";
   }
+  if (superClass && superClass.type === "Identifier") {
+    return superClass.name === "Component";
+  }
   return false;
 }
 
