@@ -1,3 +1,4 @@
+// https://github.com/babel/babylon/blob/master/ast/spec.md
 type AstNode =
   Expression |
   Identifier;
@@ -38,8 +39,23 @@ type MemberExpression = {
 
 type ObjectExpression = {
   type: "ObjectExpression";
-  properties: Array<any>;//<ObjectProperty | ObjectMethod | SpreadProperty>;
+  properties: Array<ObjectProperty>;
+  // properties: Array<ObjectProperty | ObjectMethod | SpreadProperty>;
   paths: Array<any>;
+}
+
+type ObjectProperty = {
+  type: "ObjectProperty";
+  key: Expression;
+  computed: boolean;
+  value: Expression;
+  decorators: [ Decorator ];
+  shorthand: boolean;
+}
+
+type Decorator = {
+  type: "Decorator";
+  expression: Expression;
 }
 
 type JSXElement = {

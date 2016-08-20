@@ -28,7 +28,14 @@ var getBabelRelayPlugin = require("babel-plugin-flow-relay-query");
 Create a marker function called ```generateFragmentFromProps```
 
 ```javascript
-function generateFragmentFromProps(fragmentName?: string): Function {}
+type FragmentOptions = {
+  name?: string,
+  directives?: {
+    [name: string]: { [arg: string]: boolean|number|string }
+  }
+}
+
+function generateFragmentFromProps(options?: FragmentOptions): Function {}
 ```
 
 If ```fragmentName``` is not provided then it will default to the key in the fragments object, capitalized.

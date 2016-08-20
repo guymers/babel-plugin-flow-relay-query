@@ -27,7 +27,9 @@ class Article extends React.Component {
 export default Relay.createContainer(Article, {
   fragments: {
     article: generateFragmentFromProps({
-      name: "Blah"
+      directives: {
+        relay: { plural: true }
+      }
     })
   }
 });

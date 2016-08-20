@@ -104,6 +104,7 @@ function compareFlowTypes(a: FlowTypes, b: FlowTypes, path: Array<string> = []):
 
 export function toGraphQLQueryString(
   fragmentName: string,
+  fragmentDirectives: Object,
   objectType: ObjectTypeProperty,
   relayContainerFragments: { [name: string]: Array<string> }
 ): string {
@@ -121,7 +122,9 @@ export function toGraphQLQueryString(
     return c;
   }, []);
 
-  let graphQlQuery = `\nfragment on ${fragmentName} {\n${graphQlQueryBody}`;
+  let directives = directivesToGraphQLString(fragmentDirectives);
+  directives = directives ? `${directives} ` : "";
+  let graphQlQuery = `\nfragment on ${fragmentName} ${directives}{\n${graphQlQueryBody}`;
   const graphQlQueryEnd = "\n}\n";
 
   if (childRelayContainersForFragment.length > 0) {
@@ -152,4 +155,21 @@ function objectToGraphQLString(obj: { [key: string]: FlowType }, level: number =
   }, []);
 
   return strings.join(",\n");
+}
+
+function directivesToGraphQLString(directives: Object): string {
+  const directiveNames = Object.keys(directives);
+  directiveNames.sort();
+  return directiveNames.map(directiveName => {
+    const directiveArgsMap = directives[directiveName];
+    const directiveArgs = Object.keys(directiveArgsMap);
+    directiveArgs.sort();
+
+    const directiveArgsStr = directiveArgs.map(directiveArg => {
+      const directiveArgValue = directiveArgsMap[directiveArg];
+      return `${directiveArg}: ${JSON.stringify(directiveArgValue)}`;
+    }).join(", ");
+
+    return `@${directiveName}(${directiveArgsStr})`;
+  }).join(" ");
 }

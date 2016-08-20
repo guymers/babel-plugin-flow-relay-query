@@ -6,6 +6,7 @@ import type { GraphQLSchema } from "graphql";
 import { isTypeImport, parseImport } from "./utils/import";
 import { isRelayCreateContainer, parseReactComponentClass } from "./utils/react";
 import { parseFile } from "./utils/parse";
+import { calculateFragmentOptions } from "./utils/fragmentOptions";
 import { checkPropsObjectTypeMatchesSchema, toGraphQLQueryString } from "./utils/graphql";
 
 const GEN_FRAG_FROM_PROPS_NAME = "generateFragmentFromProps";
@@ -58,8 +59,16 @@ export default function (schema: GraphQLSchema): (plugin: PluginInput) => Plugin
                 }
 
                 const reactComponentName = arg1.name;
-                const fragments = arg2.properties.filter(_ => _.key.name === "fragments");
-                const fragmentNames = fragments.length === 1 ? fragments[0].value.properties.map(_ => _.key.name) : [];
+                const fragment = arg2.properties.find(_ => _.key.type === "Identifier" && _.key.name === "fragments");
+                let fragmentNames = [];
+                if (fragment && fragment.value.type === "ObjectExpression") {
+                  fragmentNames = fragment.value.properties.reduce((fragNames, property) => {
+                    if (property.key.type === "Identifier") {
+                      fragNames.push(property.key.name);
+                    }
+                    return fragNames;
+                  }, []);
+                }
                 state.relayContainerFragments[reactComponentName] = fragmentNames;
               }
             }
@@ -96,6 +105,7 @@ export default function (schema: GraphQLSchema): (plugin: PluginInput) => Plugin
         }
       },
 
+      // is this the fragment generate marker function
       CallExpression(path: NodePath, state: ActiveVisitorState) {
         const { node, parent } = path;
         if (node.type !== "CallExpression") {
@@ -117,25 +127,25 @@ export default function (schema: GraphQLSchema): (plugin: PluginInput) => Plugin
           throw new Error("Could not find first argument for Relay.createContainer");
         }
 
-        const identifierNames = [];
+        const reactComponentNames = [];
         if (arg1Path.node.type === "Identifier") {
-          identifierNames.push(arg1Path.node.name);
+          reactComponentNames.push(arg1Path.node.name);
         } else {
           arg1Path.traverse({
             Identifier(identifierPath: NodePath) {
               if (identifierPath.node.type === "Identifier") {
-                identifierNames.push(identifierPath.node.name);
+                reactComponentNames.push(identifierPath.node.name);
               }
             }
           });
         }
-        const typeName = identifierNames.reduce(
-          (result, identifierName) => result || state.componentPropTypes[identifierName],
+        const typeName = reactComponentNames.reduce(
+          (result, reactComponentName) => result || state.componentPropTypes[reactComponentName],
           null
         );
         if (!typeName) {
-          const identifierNamesStr = identifierNames.join(", ");
-          throw new Error(`Could not find flow prop types for possible react components [${identifierNamesStr}]`);
+          const reactComponentNamesStr = reactComponentNames.join(", ");
+          throw new Error(`Could not find flow prop types for possible react components [${reactComponentNamesStr}]`);
         }
 
         const type = state.flowTypes[typeName];
@@ -149,15 +159,17 @@ export default function (schema: GraphQLSchema): (plugin: PluginInput) => Plugin
           throw new Error(`There is no property named '${fragmentKey}' in flow type ${typeName}`);
         }
 
-        let fragmentName = null;
-        const fragmentNameLiteral = node.arguments[0];
-        if (fragmentNameLiteral && fragmentNameLiteral.type === "StringLiteral") {
-          fragmentName = fragmentNameLiteral.value;
-        }
-        fragmentName = fragmentName || uppercaseFirstChar(typeAtKey.key.name);
+        const generateFragmentOptions = calculateFragmentOptions(node);
+        const fragmentName = generateFragmentOptions.name || uppercaseFirstChar(typeAtKey.key.name);
+        const fragmentDirectives = generateFragmentOptions.directives || {};
 
         checkPropsObjectTypeMatchesSchema(schema, fragmentName, typeAtKey);
-        const graphQlQuery = toGraphQLQueryString(fragmentName, typeAtKey, state.relayContainerFragments);
+        const graphQlQuery = toGraphQLQueryString(
+          fragmentName,
+          fragmentDirectives,
+          typeAtKey,
+          state.relayContainerFragments
+        );
 
         // relay needs a start location on the Relay.QL template string
         const start = node.loc.start;
