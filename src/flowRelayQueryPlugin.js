@@ -1,12 +1,12 @@
 /* @flow */
 /* eslint no-param-reassign:0 */
 import type { NodePath } from "babel-traverse";
+import type { GraphQLSchema } from "graphql";
 
 import { isTypeImport, parseImport } from "./utils/import";
 import { isRelayCreateContainer, parseReactComponentClass } from "./utils/react";
 import { parseFile } from "./utils/parse";
 import { checkPropsObjectTypeMatchesSchema, toGraphQLQueryString } from "./utils/graphql";
-import type { GraphQLSchema } from "graphql";
 
 const GEN_FRAG_FROM_PROPS_NAME = "generateFragmentFromProps";
 

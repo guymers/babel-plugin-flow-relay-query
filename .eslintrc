@@ -3,7 +3,7 @@
   "parser": "babel-eslint",
 
   "plugins": [
-    "flow-vars"
+    "flowtype"
   ],
 
   "env": {
@@ -16,19 +16,21 @@
     "curly": [2, "all"], // curly brackets for all statements
     "comma-dangle": [2, "never"], // no trailing commas
 
-    // ideally this would be [2, "nofunc"] but that causes linting to exception
-    "no-use-before-define": [0], // allow functions to be underneath their caller
+    "no-use-before-define": [2, "nofunc"], // allow functions to be underneath their caller
 
     "no-unused-vars": [2, { "varsIgnorePattern": "^_$" }],
     "max-len": [2, 150, 2],
 
     "no-duplicate-imports": 0, // doesnt work well when importing types
 
+    "import/prefer-default-export": 0, // dont care
+
+    "react/jsx-filename-extension": 0, // dont care
+    "react/prefer-stateless-function": 0,
     "react/prop-types": 0, // handled by Flow
     "react/sort-comp": 0, // dont care
-    "react/prefer-stateless-function": 0,
 
-    "flow-vars/define-flow-type": 1,
-    "flow-vars/use-flow-type": 1
+    "flowtype/define-flow-type": 1,
+    "flowtype/use-flow-type": 1
   }
 }

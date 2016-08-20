@@ -1,15 +1,15 @@
 /* @flow */
-import { convertFlowObjectTypeAnnotation } from "./flow";
-import type {
-  FlowTypes,
-  FlowType
-} from "./types";
 import {
   GraphQLObjectType,
   GraphQLNonNull,
   GraphQLScalarType
 } from "graphql";
 import type { GraphQLSchema } from "graphql";
+import type {
+  FlowTypes,
+  FlowType
+} from "./types";
+import { convertFlowObjectTypeAnnotation } from "./flow";
 
 export function checkPropsObjectTypeMatchesSchema(
   schema: GraphQLSchema,
@@ -129,11 +129,11 @@ export function toGraphQLQueryString(
       graphQlQuery = `${graphQlQuery},\n  `;
     }
 
-    graphQlQuery = graphQlQuery + childRelayContainersForFragment
+    graphQlQuery += childRelayContainersForFragment
       .map(name => `\${${name}.getFragment('${fragmentKey}')}`)
       .join(",\n  ");
   }
-  graphQlQuery = graphQlQuery + graphQlQueryEnd;
+  graphQlQuery += graphQlQueryEnd;
 
   return `() => Relay.QL\`${graphQlQuery}\``;
 }

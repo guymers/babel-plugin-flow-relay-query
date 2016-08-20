@@ -22,16 +22,22 @@ export function convertFlowObjectTypeAnnotation(objectType: ObjectTypeAnnotation
     const key = property.key.name;
     const value = property.value;
     if (value.type === "ObjectTypeAnnotation") {
-      return { ...obj, [key]: {
-        type: "object",
-        nullable: property.optional,
-        properties: convertFlowObjectTypeAnnotation(value)
-      } };
+      return {
+        ...obj,
+        [key]: {
+          type: "object",
+          nullable: property.optional,
+          properties: convertFlowObjectTypeAnnotation(value)
+        }
+      };
     }
 
-    return { ...obj, [key]: {
-      type: flowTypeAnnotationToString(value),
-      nullable: property.optional
-    } };
+    return {
+      ...obj,
+      [key]: {
+        type: flowTypeAnnotationToString(value),
+        nullable: property.optional
+      }
+    };
   }, {});
 }

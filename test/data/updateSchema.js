@@ -3,9 +3,9 @@
 
 import fs from "fs";
 import path from "path";
-import schema from "./articleSchema";
 import { graphql } from "graphql";
 import { introspectionQuery } from "graphql/utilities";
+import schema from "./articleSchema";
 
 (async () => {
   const result = await graphql(schema, introspectionQuery);
