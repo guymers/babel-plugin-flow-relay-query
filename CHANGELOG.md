@@ -1,3 +1,9 @@
+## 0.10.0
+
+* Support React Component destructuring (@chollier)
+* Update the generateFragmentFromProps() marker function to take an object instead of a string
+* Allow fragment directives to be configured via the generateFragmentFromProps() marker function
+
 ## 0.9.2
 
 * Update to Relay 0.9.2
