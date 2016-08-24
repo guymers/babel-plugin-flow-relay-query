@@ -20,7 +20,8 @@
     "check:types": "flow check",
 
     "build": "rm -rf ./lib && babel src --out-dir lib --copy-files",
-    "do-publish": "npm run check && npm run build && npm test && npm publish",
+    "build-flow": "printf '%b' 'FragmentOptions.js\\0generateFragmentFromProps.js\\0markers.js\\0' | xargs -0 -I{} cp src/{} lib/{}.flow",
+    "do-publish": "npm run check && npm run build && npm run build-flow && npm test && npm publish",
     "test": "mocha test/fixture",
     "coverage": "rm -rf coverage && babel-node node_modules/istanbul/lib/cli cover _mocha -- test/fixture"
   },

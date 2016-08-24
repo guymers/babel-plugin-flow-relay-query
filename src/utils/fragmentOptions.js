@@ -1,11 +1,6 @@
 /* @flow */
 /* eslint no-param-reassign:0 */
-export type FragmentOptions = {
-  name?: string,
-  directives?: {
-    [name: string]: { [arg: string]: boolean|number|string }
-  }
-}
+import type { FragmentOptions } from "../FragmentOptions";
 
 function objectExpressionProperties(node: ObjectExpression): { [key: string]: Expression } {
   return node.properties.reduce((opts, property) => {
