@@ -1,3 +1,7 @@
+## 0.10.1
+
+* Include Flow types for FragmentOptions
+
 ## 0.10.0
 
 * Support React Component destructuring (@chollier)
