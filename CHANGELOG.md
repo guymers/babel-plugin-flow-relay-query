@@ -1,3 +1,7 @@
+## 0.10.2
+
+* Update to Relay 0.9.3
+
 ## 0.10.1
 
 * Include Flow types for FragmentOptions
