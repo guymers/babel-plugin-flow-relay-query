@@ -44,8 +44,8 @@ function test(folder, options, expectedFile) {
 }
 
 describe("", () => {
-  for (const { folder, name } of tests) {
+  tests.forEach(({ folder, name }) => {
     it(name, () => test(folder, babelOptions, "expected.js"));
     it(`${name} - combined`, () => test(folder, itBabelOptions, "expected_combined.js"));
-  }
+  });
 });

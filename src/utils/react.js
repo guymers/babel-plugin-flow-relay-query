@@ -18,7 +18,7 @@ function extendsReactComponent(node: ClassDeclaration): boolean {
 
 function findClassProperty(node: ClassDeclaration, propertyName: string): ?ClassProperty {
   const body = node.body.body;
-  for (let i = 0; i < body.length; i++) {
+  for (let i = 0; i < body.length; i += 1) {
     const bodyNode = body[i];
     if (bodyNode.type === "ClassProperty" && bodyNode.key.name === propertyName) {
       return bodyNode;

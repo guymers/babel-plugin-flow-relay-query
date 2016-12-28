@@ -29,6 +29,7 @@
     "react/prefer-stateless-function": 0,
     "react/prop-types": 0, // handled by Flow
     "react/sort-comp": 0, // dont care
+    "react/no-unused-prop-types": 0, // doesnt work
 
     "flowtype/define-flow-type": 1,
     "flowtype/use-flow-type": 1

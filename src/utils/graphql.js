@@ -74,7 +74,7 @@ function graphqlFieldToString(field: Object): FlowType {
 type CompareFlowTypesResult = { path: Array<string>, expected: string, actual: string };
 
 function compareFlowTypes(a: FlowTypes, b: FlowTypes, path: Array<string> = []): Array<CompareFlowTypesResult> {
-  const createPath = key => {
+  const createPath = (key) => {
     const pathCopy = path.slice();
     pathCopy.push(key);
     return pathCopy;
@@ -160,12 +160,12 @@ function objectToGraphQLString(obj: { [key: string]: FlowType }, level: number =
 function directivesToGraphQLString(directives: Object): string {
   const directiveNames = Object.keys(directives);
   directiveNames.sort();
-  return directiveNames.map(directiveName => {
+  return directiveNames.map((directiveName) => {
     const directiveArgsMap = directives[directiveName];
     const directiveArgs = Object.keys(directiveArgsMap);
     directiveArgs.sort();
 
-    const directiveArgsStr = directiveArgs.map(directiveArg => {
+    const directiveArgsStr = directiveArgs.map((directiveArg) => {
       const directiveArgValue = directiveArgsMap[directiveArg];
       return `${directiveArg}: ${JSON.stringify(directiveArgValue)}`;
     }).join(", ");

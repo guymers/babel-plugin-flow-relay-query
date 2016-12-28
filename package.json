@@ -52,20 +52,20 @@
     "babel-preset-react": "^6.5.0",
     "babel-preset-stage-2": "^6.5.0",
 
-    "mocha": "3.0.2",
+    "mocha": "3.2.0",
     "istanbul": "1.0.0-alpha.2",
-    "glob": "7.0.5",
+    "glob": "7.1.1",
     "react": "15.4.1",
     "react-dom": "15.4.1",
     "react-relay": "0.10.0",
 
-    "babel-eslint": "6.1.2",
-    "eslint": "3.3.1",
-    "eslint-config-airbnb": "10.0.1",
-    "eslint-plugin-react": "6.1.2",
-    "eslint-plugin-jsx-a11y": "2.1.0",
-    "eslint-plugin-import": "1.13.0",
-    "eslint-plugin-flowtype": "2.9.0",
-    "flow-bin": "0.30.0"
+    "babel-eslint": "7.1.1",
+    "eslint": "3.12.2",
+    "eslint-config-airbnb": "13.0.0",
+    "eslint-plugin-react": "6.8.0",
+    "eslint-plugin-jsx-a11y": "2.2.3",
+    "eslint-plugin-import": "2.2.0",
+    "eslint-plugin-flowtype": "2.29.1",
+    "flow-bin": "0.37.4"
   }
 }

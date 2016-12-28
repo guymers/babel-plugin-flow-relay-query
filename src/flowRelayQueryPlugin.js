@@ -210,7 +210,7 @@ export default function (schema: GraphQLSchema): (plugin: PluginInput) => Plugin
             };
             parseFile(filename, visitor, {});
           } else {
-            variables.forEach(variable => {
+            variables.forEach((variable) => {
               state.imports[variable] = filename;
             });
           }
