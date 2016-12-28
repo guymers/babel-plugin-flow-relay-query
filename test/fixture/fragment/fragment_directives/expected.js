@@ -17,7 +17,7 @@ class Article extends React.Component {
     const { article } = this.props;
     return <div>
         <div>{article.title}</div>
-        <div>{article.content})</div>
+        <div>{article.content}</div>
       </div>;
   }
 }

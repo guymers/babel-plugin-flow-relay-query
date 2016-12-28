@@ -9,7 +9,7 @@ type ArticleProps = {
     posted: string;
     content: string;
     views: number;
-    sponsored: bool;
+    sponsored: boolean;
 
     author: {
       name: string;
@@ -24,7 +24,7 @@ class Article extends React.Component<void, ArticleProps, void> {
     return <div>
         <div>{article.title} ({article.posted})</div>
         <div>{article.author.name} [{article.author.email}]</div>
-        <div>{article.content})</div>
+        <div>{article.content}</div>
       </div>;
   }
 }

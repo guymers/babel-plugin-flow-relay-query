@@ -12,7 +12,7 @@ class Article extends React.Component {
     return <div>
         <div>{article.title} ({article.posted})</div>
         <div>{article.author.name} [{article.author.email}]</div>
-        <div>{article.content})</div>
+        <div>{article.content}</div>
       </div>;
   }
 }
