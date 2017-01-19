@@ -1,9 +1,4 @@
 /* @flow */
-import type { NodePath } from "babel-traverse";
-
-export function isRelayCreateContainer(path: NodePath): boolean {
-  return path.get("callee").matchesPattern("Relay.createContainer");
-}
 
 function extendsReactComponent(node: ClassDeclaration): boolean {
   const superClass = node.superClass;

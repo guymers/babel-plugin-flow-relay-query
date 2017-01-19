@@ -4,7 +4,7 @@ import type { NodePath } from "babel-traverse";
 import type { GraphQLSchema } from "graphql";
 
 import { isTypeImport, parseImport } from "./utils/import";
-import { isRelayCreateContainer, parseReactComponentClass } from "./utils/react";
+import { parseReactComponentClass } from "./utils/react";
 import { parseFile } from "./utils/parse";
 import { calculateFragmentOptions } from "./utils/fragmentOptions";
 import { checkPropsObjectTypeMatchesSchema, toGraphQLQueryString } from "./utils/graphql";
@@ -51,8 +51,8 @@ export default function (schema: GraphQLSchema): (plugin: PluginInput) => Plugin
         if (filename) {
           const visitor = {
             CallExpression(p: NodePath) {
-              if (isRelayCreateContainer(p) && p.node.type === "CallExpression") {
-                const n = p.node;
+              const n = p.node;
+              if (n.type === "CallExpression" && n.arguments.length === 2) {
                 const [arg1, arg2] = n.arguments;
                 if (arg1.type !== "Identifier" || arg2.type !== "ObjectExpression") {
                   return;
@@ -60,16 +60,15 @@ export default function (schema: GraphQLSchema): (plugin: PluginInput) => Plugin
 
                 const reactComponentName = arg1.name;
                 const fragment = arg2.properties.find(_ => _.key.type === "Identifier" && _.key.name === "fragments");
-                let fragmentNames = [];
                 if (fragment && fragment.value.type === "ObjectExpression") {
-                  fragmentNames = fragment.value.properties.reduce((fragNames, property) => {
+                  const fragmentNames = fragment.value.properties.reduce((fragNames, property) => {
                     if (property.key.type === "Identifier") {
                       fragNames.push(property.key.name);
                     }
                     return fragNames;
                   }, []);
+                  state.relayContainerFragments[reactComponentName] = fragmentNames;
                 }
-                state.relayContainerFragments[reactComponentName] = fragmentNames;
               }
             }
           };
@@ -116,7 +115,7 @@ export default function (schema: GraphQLSchema): (plugin: PluginInput) => Plugin
           return;
         }
 
-        const relayCreateContainer = path.findParent(p => t.isCallExpression(p) && isRelayCreateContainer(p));
+        const relayCreateContainer = path.findParent(p => t.isCallExpression(p));
         if (!relayCreateContainer || relayCreateContainer.node.type !== "CallExpression") {
           return;
         }
