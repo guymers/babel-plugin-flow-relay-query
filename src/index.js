@@ -4,11 +4,15 @@ import createFlowRelayQueryPlugin from "./flowRelayQueryPlugin";
 import createSchema from "./createSchema";
 import type { GraphQLSchemaProvider } from "./createSchema";
 
-function createPlugin(schemaProvider: GraphQLSchemaProvider, pluginOptions?: Object): Function {
-  const babelRelayPlugin = getBabelRelayPlugin(schemaProvider, pluginOptions);
+function createPlugin(
+  schemaProvider: GraphQLSchemaProvider,
+  babelpluginOptions: Object = {},
+  pluginOptions: Object = {}
+): Function {
+  const babelRelayPlugin = getBabelRelayPlugin(schemaProvider, babelpluginOptions);
 
   const schema = createSchema(schemaProvider);
-  const flowRelayQueryPlugin = createFlowRelayQueryPlugin(schema);
+  const flowRelayQueryPlugin = createFlowRelayQueryPlugin(schema, pluginOptions);
 
   return function plugin(babel) {
     return {

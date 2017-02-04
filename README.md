@@ -53,7 +53,7 @@ If a fragment type is not provided in the options then it will default to the ke
 ```javascript
 import React from "react";
 import Relay from "react-relay";
-import generateFragmentFromProps from "babel-plugin-flow-relay-query/lib/generateFragmentFromProps";
+import { generateFragmentFromProps } from "babel-plugin-flow-relay-query/lib/markers";
 
 type ArticleProps = {
   article: {
@@ -134,7 +134,9 @@ First set apollo generation options globally:
 
 ```javascript
 var ChildFragmentTransformations = require("babel-plugin-flow-relay-query/lib/ChildFragmentTransformations");
-var getBabelRelayPlugin = require("babel-plugin-flow-relay-query", {
+var babelRelayPlugin = require("babel-plugin-flow-relay-query");
+const schema = require("??/schema.json");
+module.exports = babelRelayPlugin(schema.data, {}, {
   defaultTemplateTag: "gql",
   defaultFragmentName: ChildFragmentTransformations.apolloFragmentName,
   childFragmentTransformations: ChildFragmentTransformations.apollo
@@ -144,7 +146,7 @@ var getBabelRelayPlugin = require("babel-plugin-flow-relay-query", {
 ```javascript
 import React from "react";
 import gql from "graphql-tag";
-import generateFragmentFromPropsFor from "babel-plugin-flow-relay-query/lib/generateFragmentFromPropsFor";
+import { generateFragmentFromPropsFor } from "babel-plugin-flow-relay-query/lib/markers";
 
 type ArticleProps = {
   article: {
