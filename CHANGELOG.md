@@ -1,3 +1,10 @@
+## 0.10.4
+
+* No longer requires the explicit 'Relay.createContainer', only the number and type of arguments to the function matter
+* Add additional FragmentOptions ('name' has been renamed to 'type')
+* Add a generateFragmentFromPropsFor() marker function which requires an explicit ReactComponent as its first argument
+* Support generating Apollo GraphQL fragments
+
 ## 0.10.3
 
 * Update to Relay 0.10.0
