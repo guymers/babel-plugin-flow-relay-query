@@ -53,7 +53,7 @@ If a fragment type is not provided in the options then it will default to the ke
 ```javascript
 import React from "react";
 import Relay from "react-relay";
-import generateFragmentFromProps from ""babel-plugin-flow-relay-query/lib/generateFragmentFromProps";
+import generateFragmentFromProps from "babel-plugin-flow-relay-query/lib/generateFragmentFromProps";
 
 type ArticleProps = {
   article: {
