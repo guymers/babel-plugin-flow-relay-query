@@ -1,6 +1,6 @@
 # babel-plugin-flow-relay-query
 
-Babel 6 plugin which converts Flow types into Relay fragments.
+Babel plugin which converts Flow types into GraphQL fragments.
 
 ## Installation
 
@@ -25,39 +25,45 @@ var getBabelRelayPlugin = require("babel-plugin-flow-relay-query");
 
 ## Example
 
-Create a marker function called ```generateFragmentFromProps```:
+Create a marker function called ```generateFragmentFromProps``` or ```generateFragmentFromPropsFor```:
 
 ```javascript
 type FragmentOptions = {
-  name?: string,
+  name?: string;
+  type?: string;
+  templateTag?: string;
   directives?: {
-    [name: string]: { [arg: string]: boolean|number|string }
-  }
+    [name: string]: { [arg: string]: boolean|number|string };
+  };
 }
 
 function generateFragmentFromProps(options?: FragmentOptions): Function {}
+function generateFragmentFromPropsFor(component: ReactClass<*>, options?: FragmentOptions): Function {}
 ```
 
-Or just import one that is shipped with the plugin:
+Or just import one of the ones that are shipped with the plugin:
 
 ```javscript
 import { generateFragmentFromProps } from "babel-plugin-flow-relay-query/lib/markers";
+import { generateFragmentFromPropsFor } from "babel-plugin-flow-relay-query/lib/markers";
 ```
 
-If fragment name is not provided in the options then it will default to the key in the fragments object, capitalized.
+If a fragment type is not provided in the options then it will default to the key in the fragments object, capitalized.
 
 ```javascript
-import generateFragmentFromProps from "./generateFragmentFromProps";
+import React from "react";
+import Relay from "react-relay";
+import generateFragmentFromProps from ""babel-plugin-flow-relay-query/lib/generateFragmentFromProps";
 
 type ArticleProps = {
   article: {
-    title: string,
-    posted: string,
-    content: string,
+    title: string;
+    posted: string;
+    content: string;
 
     author: {
-      name: string,
-      email: string
+      name: string;
+      email: string;
     }
   }
 };
@@ -120,4 +126,52 @@ const Article = ({ article }: ArticleProps) => (
     <div>{article.content})</div>
   </div>
 );
+```
+
+This plugin can also create GraphQL strings for Apollo:
+
+First set apollo generation options globally:
+
+```javascript
+var ChildFragmentTransformations = require("babel-plugin-flow-relay-query/lib/ChildFragmentTransformations");
+var getBabelRelayPlugin = require("babel-plugin-flow-relay-query", {
+  defaultTemplateTag: "gql",
+  defaultFragmentName: ChildFragmentTransformations.apolloFragmentName,
+  childFragmentTransformations: ChildFragmentTransformations.apollo
+});
+```
+
+```javascript
+import React from "react";
+import gql from "graphql-tag";
+import generateFragmentFromPropsFor from "babel-plugin-flow-relay-query/lib/generateFragmentFromPropsFor";
+
+type ArticleProps = {
+  article: {
+    title: string;
+    content: string;
+  }
+};
+
+class Article extends React.Component {
+  props: ArticleProps;
+
+  render() {
+    const { article } = this.props;
+    return (
+      <div>
+        <ArticleTitle article={article} />
+        <div>{article.author.name} [{article.author.email}]</div>
+        <ArticleBody article={article} />
+        <Footer />
+      </div>
+    );
+  }
+}
+
+Article.fragments = {
+  article: generateFragmentFromPropsFor(Article)
+};
+
+export default Article;
 ```

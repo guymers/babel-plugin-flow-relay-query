@@ -27,11 +27,11 @@ export default Relay.createContainer(Article, {
   fragments: {
     article: () => Relay.QL`
 fragment on Article {
-  title,
-  posted,
-  content,
+  title
+  posted
+  content
   author {
-    name,
+    name
     email
   }
 }

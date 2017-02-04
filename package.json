@@ -20,7 +20,7 @@
     "check:types": "flow check",
 
     "build": "rm -rf ./lib && babel src --out-dir lib --copy-files",
-    "build-flow": "printf '%b' 'FragmentOptions.js\\0generateFragmentFromProps.js\\0markers.js\\0' | xargs -0 -I{} cp src/{} lib/{}.flow",
+    "build-flow": "printf '%b' 'FragmentOptions.js\\0ChildFragmentTransformations.js\\0generateFragmentFromProps.js\\0generateFragmentFromPropsFor.js\\0markers.js\\0' | xargs -0 -I{} cp src/{} lib/{}.flow",
     "do-publish": "npm run check && npm run build && npm run build-flow && npm test && npm publish",
     "benchmark": "babel-node test/benchmark/benchmark",
     "test": "mocha test/fixture",
@@ -59,6 +59,8 @@
     "react": "15.4.1",
     "react-dom": "15.4.1",
     "react-relay": "0.10.0",
+
+    "graphql-tag": "1.2.4",
 
     "benchmark": "2.1.3",
 

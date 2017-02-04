@@ -1,6 +1,6 @@
 /* @flow */
 import React from "react";
-import Relay from "react-relay";
+import gql from "graphql-tag"; // eslint-disable-line no-unused-vars
 
 
 type ArticleProps = {
@@ -22,13 +22,13 @@ class Article extends React.Component {
   }
 }
 
-export default Relay.createContainer(Article, {
-  fragments: {
-    article: () => Relay.QL`
-fragment on Article @relay(plural: true) {
+Article.fragments = {
+  article: gql`
+fragment ArticleArticleFragment on Article {
   title
   content
 }
 `
-  }
-});
+};
+
+export default Article;

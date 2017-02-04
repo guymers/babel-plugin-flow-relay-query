@@ -5,6 +5,7 @@ import Relay from "react-relay";
 
 import ArticleBody from "./ArticleBody";
 import ArticleTitle from "./ArticleTitle";
+import Footer from "./Footer";
 
 type ArticleProps = {
   article: {
@@ -28,6 +29,7 @@ class Article extends React.Component {
         <ArticleTitle article={article} />
         <div>{article.author.name} [{article.author.email}]</div>
         <ArticleBody article={article} />
+        <Footer />
       </div>;
   }
 }

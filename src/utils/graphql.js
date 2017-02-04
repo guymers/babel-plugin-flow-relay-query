@@ -9,16 +9,17 @@ import type {
   FlowTypes,
   FlowType
 } from "./types";
+import type { ChildFragmentTransformations } from "../ChildFragmentTransformations";
 import { convertFlowObjectTypeAnnotation } from "./flow";
 
 export function checkPropsObjectTypeMatchesSchema(
   schema: GraphQLSchema,
-  fragmentName: string,
+  fragmentType: string,
   objectType: ObjectTypeProperty
 ) {
-  const graphqlType = schema.getType(fragmentName);
+  const graphqlType = schema.getType(fragmentType);
   if (!graphqlType || !(graphqlType instanceof GraphQLObjectType)) {
-    throw new Error(`There is no GraphQL object type named '${fragmentName}'`);
+    throw new Error(`There is no GraphQL object type named '${fragmentType}'`);
   }
 
   const typeAnnotation = objectType.value;
@@ -28,7 +29,7 @@ export function checkPropsObjectTypeMatchesSchema(
   const result = compareFlowTypes(flowTypes, graphqlTypes);
   if (result.length > 0) {
     const errors = result.map(r => `Expected type '${r.expected}', actual type '${r.actual}' for path ${r.path.join(".")}`);
-    throw new Error(`Errors for fragment ${fragmentName}:\n${errors.join("\n")}`);
+    throw new Error(`Errors for fragment ${fragmentType}:\n${errors.join("\n")}`);
   }
 }
 
@@ -103,10 +104,12 @@ function compareFlowTypes(a: FlowTypes, b: FlowTypes, path: Array<string> = []):
 }
 
 export function toGraphQLQueryString(
-  fragmentName: string,
+  fragmentName: ?string,
+  fragmentType: string,
   fragmentDirectives: Object,
   objectType: ObjectTypeProperty,
-  relayContainerFragments: { [name: string]: Array<string> }
+  componentContainerFragments: { [name: string]: Array<string> },
+  childFragmentTransformations: ChildFragmentTransformations
 ): string {
   const fragmentKey = objectType.key.name;
   const typeAnnotation = objectType.value;
@@ -114,8 +117,8 @@ export function toGraphQLQueryString(
 
   const graphQlQueryBody = objectToGraphQLString(obj);
 
-  const childRelayContainersForFragment = Object.keys(relayContainerFragments).reduce((c, name) => {
-    const fragmentKeys = relayContainerFragments[name];
+  const childContainersForFragment = Object.keys(componentContainerFragments).reduce((c, name) => {
+    const fragmentKeys = componentContainerFragments[name];
     if (fragmentKeys.indexOf(fragmentKey) >= 0) {
       c.push(name);
     }
@@ -124,21 +127,34 @@ export function toGraphQLQueryString(
 
   let directives = directivesToGraphQLString(fragmentDirectives);
   directives = directives ? `${directives} ` : "";
-  let graphQlQuery = `\nfragment on ${fragmentName} ${directives}{\n${graphQlQueryBody}`;
+  const fragName = fragmentName ? ` ${fragmentName}` : "";
+  let graphQlQuery = `\nfragment${fragName} on ${fragmentType} ${directives}{\n${graphQlQueryBody}`;
   const graphQlQueryEnd = "\n}\n";
 
-  if (childRelayContainersForFragment.length > 0) {
+  const insideChildFragmentStrings = childContainersForFragment
+    .map(name => childFragmentTransformations.insideFragment(name, fragmentKey))
+    .filter(fragStr => fragStr !== null);
+
+  if (insideChildFragmentStrings.length > 0) {
     if (graphQlQueryBody) {
-      graphQlQuery = `${graphQlQuery},\n  `;
+      graphQlQuery += "\n  ";
     }
 
-    graphQlQuery += childRelayContainersForFragment
-      .map(name => `\${${name}.getFragment('${fragmentKey}')}`)
-      .join(",\n  ");
+    graphQlQuery += insideChildFragmentStrings.join("\n  ");
   }
+
   graphQlQuery += graphQlQueryEnd;
 
-  return `() => Relay.QL\`${graphQlQuery}\``;
+  const outsideChildFragmentStrings = childContainersForFragment
+    .map(name => childFragmentTransformations.outsideFragment(name, fragmentKey))
+    .filter(fragStr => fragStr !== null);
+
+  if (outsideChildFragmentStrings.length > 0) {
+    graphQlQuery += outsideChildFragmentStrings.join("\n");
+    graphQlQuery += "\n";
+  }
+
+  return `${graphQlQuery}`;
 }
 
 function objectToGraphQLString(obj: { [key: string]: FlowType }, level: number = 1): string {
@@ -154,7 +170,7 @@ function objectToGraphQLString(obj: { [key: string]: FlowType }, level: number =
     return parts;
   }, []);
 
-  return strings.join(",\n");
+  return strings.join("\n");
 }
 
 function directivesToGraphQLString(directives: Object): string {

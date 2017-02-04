@@ -11,17 +11,27 @@ function objectExpressionProperties(node: ObjectExpression): { [key: string]: Ex
   }, {});
 }
 
-export function calculateFragmentOptions(genFragmentMarkerFunction: CallExpression): FragmentOptions {
+function findStringLiteral(name: string, items: { [key: string]: Expression }): ?string {
+  const node = items[name];
+  if (node && node.type === "StringLiteral") {
+    return node.value;
+  }
+  return null;
+}
+
+export function calculateFragmentOptions(callExpression: CallExpression, argumentIndex: number = 0): FragmentOptions {
   const options = {};
 
-  const optionObj = genFragmentMarkerFunction.arguments[0];
+  const optionObj = callExpression.arguments[argumentIndex];
   if (optionObj && optionObj.type === "ObjectExpression") {
     const fragmentOptions = objectExpressionProperties(optionObj);
 
-    const nameNode = fragmentOptions.name;
-    if (nameNode && nameNode.type === "StringLiteral") {
-      options.name = nameNode.value;
-    }
+    ["name", "type", "templateTag"].forEach((key) => {
+      const value = findStringLiteral(key, fragmentOptions);
+      if (value) {
+        options[key] = value;
+      }
+    });
 
     const directivesNode = fragmentOptions.directives;
     if (directivesNode && directivesNode.type === "ObjectExpression") {

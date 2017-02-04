@@ -27,17 +27,24 @@ const createBabelOptions = plugin => ({
     plugin
   ]
 });
-const babelOptions = createBabelOptions(createFlowRelayQueryPlugin(createSchema(schema.data)));
+const customBabelOptions = options => createBabelOptions(createFlowRelayQueryPlugin(createSchema(schema.data), options));
+const babelOptions = customBabelOptions({});
 const itBabelOptions = createBabelOptions(pluginDef(schema.data));
 
 function test(folder, options, expectedFile) {
-  const sourceFile = path.resolve(folder, "source.js");
+  const optionsFile = path.resolve(folder, "options.js");
+  if (fs.existsSync(optionsFile)) {
+    options = customBabelOptions(require(optionsFile)); // eslint-disable-line no-param-reassign, global-require, import/no-dynamic-require
+  }
+
   let result = "";
   try {
+    const sourceFile = path.resolve(folder, "source.js");
     result = transformFileSync(sourceFile, options).code;
   } catch (e) {
     result = e.message;
   }
+
   const expected = fs.readFileSync(path.resolve(folder, expectedFile), "utf8");
 
   assert.equal(result.trim(), expected.trim().replace("{PROJECT_ROOT}", path.resolve(cwd, "../..")));

@@ -1,6 +1,6 @@
 /* @flow */
 import React from "react";
-import Relay from "react-relay";
+import gql from "graphql-tag"; // eslint-disable-line no-unused-vars
 
 
 import ArticleBody from "./ArticleBody";
@@ -10,13 +10,7 @@ import Footer from "./Footer";
 type ArticleProps = {
   article: {
     title: string;
-    posted: string;
     content: string;
-
-    author: {
-      name: string;
-      email: string;
-    };
   }
 };
 
@@ -34,20 +28,17 @@ class Article extends React.Component {
   }
 }
 
-export default Relay.createContainer(Article, {
-  fragments: {
-    article: () => Relay.QL`
-fragment on Article {
+Article.fragments = {
+  article: gql`
+fragment ArticleArticleFragment on Article {
   title
-  posted
   content
-  author {
-    name
-    email
-  }
-  ${ArticleTitle.getFragment('article')}
-  ${ArticleBody.getFragment('article')}
+  ...ArticleTitleArticleFragment
+  ...ArticleBodyArticleFragment
 }
+${ArticleTitle.fragments.article}
+${ArticleBody.fragments.article}
 `
-  }
-});
+};
+
+export default Article;
