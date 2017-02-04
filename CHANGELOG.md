@@ -1,3 +1,7 @@
+## 0.10.5
+
+* Fix plugin options not getting passed to the plugin
+
 ## 0.10.4
 
 * No longer requires the explicit 'Relay.createContainer', only the number and type of arguments to the function matter
