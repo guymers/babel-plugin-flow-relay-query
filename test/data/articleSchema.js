@@ -5,20 +5,35 @@ import {
   GraphQLSchema,
   GraphQLString,
   GraphQLInt,
-  GraphQLBoolean
+  GraphQLBoolean,
+  GraphQLList
 } from "graphql";
 
-const authorType = new GraphQLObjectType({
+let articleType;
+let authorType;
+
+const editorType = new GraphQLObjectType({
+  name: "Editor",
+  fields: () => ({
+    author: { type: new GraphQLNonNull(authorType) }
+  })
+});
+
+authorType = new GraphQLObjectType({
   name: "Author",
   fields: () => ({
     id: { type: new GraphQLNonNull(GraphQLString) },
     name: { type: new GraphQLNonNull(GraphQLString) },
     email: { type: new GraphQLNonNull(GraphQLString) },
-    twitter: { type: GraphQLString }
+    twitter: { type: GraphQLString },
+    editor: { type: new GraphQLNonNull(editorType) },
+    articles: {
+      type: new GraphQLList(articleType)
+    }
   })
 });
 
-const articleType = new GraphQLObjectType({
+articleType = new GraphQLObjectType({
   name: "Article",
   fields: () => ({
     id: { type: new GraphQLNonNull(GraphQLString) },

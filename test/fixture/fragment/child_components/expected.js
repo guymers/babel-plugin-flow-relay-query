@@ -45,8 +45,8 @@ fragment on Article {
     name
     email
   }
-  ${ArticleTitle.getFragment('article')}
-  ${ArticleBody.getFragment('article')}
+  ${ ArticleTitle.getFragment('article') }
+  ${ ArticleBody.getFragment('article') }
 }
 `
   }
