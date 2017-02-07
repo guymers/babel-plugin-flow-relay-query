@@ -103,17 +103,34 @@ function compareFlowTypes(a: FlowTypes, b: FlowTypes, path: Array<string> = []):
   }, []);
 }
 
+function getObjectFromAnnotation(
+  typeAnnotation: Object,
+  flowTypes: { [name: string]: Object }
+): Object {
+  switch (typeAnnotation.type) {
+    case "ObjectTypeAnnotation":
+      return convertFlowObjectTypeAnnotation(typeAnnotation, flowTypes);
+    case "GenericTypeAnnotation":
+      return typeAnnotation.id && flowTypes[typeAnnotation.id.name]
+        ? convertFlowObjectTypeAnnotation(flowTypes[typeAnnotation.id.name], flowTypes)
+        : {};
+    default:
+      return {};
+  }
+}
+
 export function toGraphQLQueryString(
   fragmentName: ?string,
   fragmentType: string,
   fragmentDirectives: Object,
   objectType: ObjectTypeProperty,
   componentContainerFragments: { [name: string]: Array<string> },
-  childFragmentTransformations: ChildFragmentTransformations
+  childFragmentTransformations: ChildFragmentTransformations,
+  flowTypes: { [name: string]: Object }
 ): string {
   const fragmentKey = objectType.key.name;
   const typeAnnotation = objectType.value;
-  const obj = typeAnnotation.type === "ObjectTypeAnnotation" ? convertFlowObjectTypeAnnotation(typeAnnotation) : {};
+  const obj = getObjectFromAnnotation(typeAnnotation, flowTypes);
 
   const graphQlQueryBody = objectToGraphQLString(obj);
 
