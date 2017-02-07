@@ -34,12 +34,21 @@ export function checkPropsObjectTypeMatchesSchema(
 }
 
 function convertGraphqlObjectType(objectType: GraphQLObjectType): FlowTypes {
-  const fields = objectType.getFields();
-  return Object.keys(fields).reduce((obj, key) => {
-    const field = fields[key];
-    return { ...obj, [key]: graphqlFieldToString(field) };
-  }, {});
+  const objectTypeString = objectType.toString();
+  if (!convertGraphqlObjectType.cache[objectTypeString]) {
+    const fields = objectType.getFields();
+    // placeholder while we have possible recursive structures
+    convertGraphqlObjectType.cache[objectTypeString] = true;
+    convertGraphqlObjectType.cache[objectTypeString] = Object.keys(fields).reduce((obj, key) => {
+      const field = fields[key];
+      return { ...obj, [key]: graphqlFieldToString(field) };
+    }, {});
+  }
+
+  return convertGraphqlObjectType.cache[objectTypeString];
 }
+
+convertGraphqlObjectType.cache = {};
 
 function graphqlFieldToString(field: Object): FlowType {
   let nullable = true;
@@ -105,7 +114,7 @@ function compareFlowTypes(a: FlowTypes, b: FlowTypes, path: Array<string> = []):
 
 function getObjectFromAnnotation(
   typeAnnotation: Object,
-  flowTypes: { [name: string]: Object }
+  flowTypes: { [name: string]: ObjectTypeAnnotation }
 ): Object {
   switch (typeAnnotation.type) {
     case "ObjectTypeAnnotation":
@@ -126,7 +135,7 @@ export function toGraphQLQueryString(
   objectType: ObjectTypeProperty,
   componentContainerFragments: { [name: string]: Array<string> },
   childFragmentTransformations: ChildFragmentTransformations,
-  flowTypes: { [name: string]: Object }
+  flowTypes: { [name: string]: ObjectTypeAnnotation }
 ): string {
   const fragmentKey = objectType.key.name;
   const typeAnnotation = objectType.value;

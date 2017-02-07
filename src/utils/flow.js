@@ -19,7 +19,7 @@ function flowTypeAnnotationToString(type: TypeTypeAnnotation): string {
 // convert an ObjectTypeAnnotation to a js object
 export function convertFlowObjectTypeAnnotation(
   objectType: ObjectTypeAnnotation,
-  flowTypes: { [name: string ]: Object } = {}
+  flowTypes: { [name: string ]: ObjectTypeAnnotation } = {}
 ): FlowTypes {
   return objectType.properties.reduce((obj, property) => {
     const key = property.key.name;
