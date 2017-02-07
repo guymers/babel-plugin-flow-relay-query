@@ -36,8 +36,8 @@ fragment ArticleArticleFragment on Article {
   ...ArticleTitleArticleFragment
   ...ArticleBodyArticleFragment
 }
-${ ArticleTitle.fragments.article }
-${ ArticleBody.fragments.article }
+${ArticleTitle.fragments.article}
+${ArticleBody.fragments.article}
 `
 };
 
