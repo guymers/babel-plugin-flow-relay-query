@@ -1,9 +1,9 @@
 {
   "name": "babel-plugin-flow-relay-query",
-  "version": "0.10.5",
+  "version": "0.10.6",
   "description": "Babel plugin which converts Flow types into Relay fragments",
   "keywords": [
-    "babel-plugin", "relay", "flow"
+    "babel-plugin", "relay", "flowtype", "apollo-client"
   ],
   "license": "MIT",
   "repository": "guymers/babel-plugin-flow-relay-query",

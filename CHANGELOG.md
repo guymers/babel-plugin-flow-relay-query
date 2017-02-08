@@ -1,3 +1,8 @@
+## 0.10.6
+
+* Handle recursive types that reference each other directly (@kalley)
+* Allow types to reference other types (@kalley)
+
 ## 0.10.5
 
 * Fix plugin options not getting passed to the plugin
