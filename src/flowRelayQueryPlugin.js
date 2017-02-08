@@ -217,7 +217,8 @@ export default function (schema: GraphQLSchema, options: PluginOptions = {}): (p
           fragmentDirectives,
           typeAtKey,
           state.componentContainerFragments,
-          childFragmentTransformations
+          childFragmentTransformations,
+          state.flowTypes
         );
 
         const templateTag = generateFragmentOptions.templateTag || defaultTemplateTag;

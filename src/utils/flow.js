@@ -17,7 +17,10 @@ function flowTypeAnnotationToString(type: TypeTypeAnnotation): string {
 }
 
 // convert an ObjectTypeAnnotation to a js object
-export function convertFlowObjectTypeAnnotation(objectType: ObjectTypeAnnotation): FlowTypes {
+export function convertFlowObjectTypeAnnotation(
+  objectType: ObjectTypeAnnotation,
+  flowTypes: { [name: string ]: ObjectTypeAnnotation } = {}
+): FlowTypes {
   return objectType.properties.reduce((obj, property) => {
     const key = property.key.name;
     const value = property.value;
@@ -27,7 +30,18 @@ export function convertFlowObjectTypeAnnotation(objectType: ObjectTypeAnnotation
         [key]: {
           type: "object",
           nullable: property.optional,
-          properties: convertFlowObjectTypeAnnotation(value)
+          properties: convertFlowObjectTypeAnnotation(value, flowTypes)
+        }
+      };
+    }
+
+    if (value.type === "GenericTypeAnnotation" && value.id && flowTypes[value.id.name]) {
+      return {
+        ...obj,
+        [key]: {
+          type: "object",
+          nullable: property.optional,
+          properties: convertFlowObjectTypeAnnotation(flowTypes[value.id.name], flowTypes)
         }
       };
     }
