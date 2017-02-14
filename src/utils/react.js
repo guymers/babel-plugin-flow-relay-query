@@ -3,10 +3,10 @@
 function extendsReactComponent(node: ClassDeclaration): boolean {
   const superClass = node.superClass;
   if (superClass && superClass.type === "MemberExpression") {
-    return superClass.object.name === "React" && superClass.property.name === "Component";
+    return superClass.object.name === "React" && (superClass.property.name === "Component" || superClass.property.name === "PureComponent");
   }
   if (superClass && superClass.type === "Identifier") {
-    return superClass.name === "Component";
+    return superClass.name === "Component" || superClass.name === "PureComponent";
   }
   return false;
 }
