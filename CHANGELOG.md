@@ -1,3 +1,7 @@
+## 0.10.7
+
+* Handle React.PureComponent (@kalley)
+
 ## 0.10.6
 
 * Handle recursive types that reference each other directly (@kalley)
