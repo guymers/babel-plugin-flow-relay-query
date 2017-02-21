@@ -46,6 +46,21 @@ export function convertFlowObjectTypeAnnotation(
       };
     }
 
+    if (value.type === "ArrayTypeAnnotation" && value.elementType) {
+      const children = value.elementType.id && flowTypes[value.elementType.id.name]
+        ? flowTypes[value.elementType.id.name]
+        : value.elementType;
+
+      return {
+        ...obj,
+        [key]: {
+          type: "array",
+          nullable: property.optional,
+          children: convertFlowObjectTypeAnnotation(children, flowTypes)
+        }
+      };
+    }
+
     return {
       ...obj,
       [key]: {

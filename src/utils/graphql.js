@@ -1,5 +1,6 @@
 /* @flow */
 import {
+  GraphQLList,
   GraphQLObjectType,
   GraphQLNonNull,
   GraphQLScalarType
@@ -63,6 +64,14 @@ function graphqlFieldToString(field: Object): FlowType {
       type: "object",
       nullable,
       properties: convertGraphqlObjectType(graphqlType)
+    };
+  }
+
+  if (graphqlType instanceof GraphQLList) {
+    return {
+      type: "array",
+      nullable,
+      children: convertGraphqlObjectType(graphqlType.ofType)
     };
   }
 
@@ -191,6 +200,9 @@ function objectToGraphQLString(obj: { [key: string]: FlowType }, level: number =
     let str = key;
     if (value.type === "object") {
       str = `${str} {\n${objectToGraphQLString(value.properties, level + 1)}\n${indentation}}`;
+    }
+    if (value.type === "array") {
+      str = `${str} {\n${objectToGraphQLString(value.children, level + 1)}\n${indentation}}`;
     }
     parts.push(indentation + str);
     return parts;
