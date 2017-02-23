@@ -6,6 +6,7 @@ import Relay from "react-relay";
 type ArticleGraph = {
   title: string;
   posted: string;
+  tags: string[];
 };
 
 type AuthorGraph = {
@@ -26,7 +27,10 @@ class Author extends React.Component {
     return <div>
         <div>{author.name} ({author.email})</div>
         <ul>
-          {author.articles.map(article => <li>{article.title} ({article.posted})</li>)}
+          {author.articles.map(article => <li>
+              <div>{article.title} ({article.posted})</div>
+              <div>{article.tags.join(", ")}</div>
+            </li>)}
         </ul>
       </div>;
   }
@@ -41,6 +45,7 @@ fragment on Author {
   articles {
     title
     posted
+    tags
   }
 }
 `

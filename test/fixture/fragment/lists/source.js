@@ -6,6 +6,7 @@ import generateFragmentFromProps from "../../../../src/generateFragmentFromProps
 type ArticleGraph = {
   title: string;
   posted: string;
+  tags: string[];
 }
 
 type AuthorGraph = {
@@ -28,7 +29,10 @@ class Author extends React.Component {
         <div>{author.name} ({author.email})</div>
         <ul>
           {author.articles.map(article => (
-            <li>{article.title} ({article.posted})</li>
+            <li>
+              <div>{article.title} ({article.posted})</div>
+              <div>{article.tags.join(", ")}</div>
+            </li>
           ))}
         </ul>
       </div>

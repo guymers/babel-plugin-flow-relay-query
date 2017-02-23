@@ -56,7 +56,7 @@ export function convertFlowObjectTypeAnnotation(
         [key]: {
           type: "array",
           nullable: property.optional,
-          children: convertFlowObjectTypeAnnotation(children, flowTypes)
+          children: children.properties ? convertFlowObjectTypeAnnotation(children, flowTypes) : null
         }
       };
     }

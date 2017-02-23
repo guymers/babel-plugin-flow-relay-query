@@ -68,10 +68,12 @@ function graphqlFieldToString(field: Object): FlowType {
   }
 
   if (graphqlType instanceof GraphQLList) {
+    const children = graphqlFieldToString(graphqlType.ofType);
+
     return {
       type: "array",
       nullable,
-      children: convertGraphqlObjectType(graphqlType.ofType)
+      children: children.type === "object" ? convertGraphqlObjectType(graphqlType.ofType) : null
     };
   }
 
@@ -201,7 +203,7 @@ function objectToGraphQLString(obj: { [key: string]: FlowType }, level: number =
     if (value.type === "object") {
       str = `${str} {\n${objectToGraphQLString(value.properties, level + 1)}\n${indentation}}`;
     }
-    if (value.type === "array") {
+    if (value.type === "array" && value.children) {
       str = `${str} {\n${objectToGraphQLString(value.children, level + 1)}\n${indentation}}`;
     }
     parts.push(indentation + str);
