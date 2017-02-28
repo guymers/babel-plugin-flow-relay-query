@@ -16,6 +16,17 @@ function flowTypeAnnotationToString(type: TypeTypeAnnotation): string {
   }
 }
 
+function resolveFlowObjectTypeAnnotation(
+  objectType: TypeTypeAnnotation,
+  flowTypes: { [name: string ]: ObjectTypeAnnotation }
+): TypeTypeAnnotation {
+  if (objectType.type === "GenericTypeAnnotation" && objectType.id && flowTypes[objectType.id.name]) {
+    return flowTypes[objectType.id.name];
+  }
+
+  return objectType;
+}
+
 // convert an ObjectTypeAnnotation to a js object
 export function convertFlowObjectTypeAnnotation(
   objectType: ObjectTypeAnnotation,
@@ -23,7 +34,8 @@ export function convertFlowObjectTypeAnnotation(
 ): FlowTypes {
   return objectType.properties.reduce((obj, property) => {
     const key = property.key.name;
-    const value = property.value;
+    const value = resolveFlowObjectTypeAnnotation(property.value, flowTypes);
+
     if (value.type === "ObjectTypeAnnotation") {
       return {
         ...obj,
@@ -35,28 +47,15 @@ export function convertFlowObjectTypeAnnotation(
       };
     }
 
-    if (value.type === "GenericTypeAnnotation" && value.id && flowTypes[value.id.name]) {
-      return {
-        ...obj,
-        [key]: {
-          type: "object",
-          nullable: property.optional,
-          properties: convertFlowObjectTypeAnnotation(flowTypes[value.id.name], flowTypes)
-        }
-      };
-    }
-
     if (value.type === "ArrayTypeAnnotation" && value.elementType) {
-      const children = value.elementType.id && flowTypes[value.elementType.id.name]
-        ? flowTypes[value.elementType.id.name]
-        : value.elementType;
+      const children = resolveFlowObjectTypeAnnotation(value.elementType, flowTypes);
 
       return {
         ...obj,
         [key]: {
           type: "array",
           nullable: property.optional,
-          children: children.properties ? convertFlowObjectTypeAnnotation(children, flowTypes) : null
+          children: children.type === "ObjectTypeAnnotation" ? convertFlowObjectTypeAnnotation(children, flowTypes) : null
         }
       };
     }
