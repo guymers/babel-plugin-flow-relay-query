@@ -68,12 +68,10 @@ function graphqlFieldToString(field: Object): FlowType {
   }
 
   if (graphqlType instanceof GraphQLList) {
-    const children = graphqlFieldToString(graphqlType.ofType);
-
     return {
       type: "array",
       nullable,
-      children: children.type === "object" ? convertGraphqlObjectType(graphqlType.ofType) : null
+      children: graphqlType.ofType instanceof GraphQLObjectType ? convertGraphqlObjectType(graphqlType.ofType) : null
     };
   }
 
