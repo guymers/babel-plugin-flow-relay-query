@@ -16,7 +16,7 @@ function flowTypeAnnotationToString(type: TypeTypeAnnotation): string {
   }
 }
 
-function resolveFlowObjectTypeAnnotation(
+function resolveFlowTypeAnnotation(
   objectType: TypeTypeAnnotation,
   flowTypes: { [name: string ]: ObjectTypeAnnotation }
 ): TypeTypeAnnotation {
@@ -34,7 +34,7 @@ export function convertFlowObjectTypeAnnotation(
 ): FlowTypes {
   return objectType.properties.reduce((obj, property) => {
     const key = property.key.name;
-    const value = resolveFlowObjectTypeAnnotation(property.value, flowTypes);
+    const value = resolveFlowTypeAnnotation(property.value, flowTypes);
 
     if (value.type === "ObjectTypeAnnotation") {
       return {
@@ -48,7 +48,7 @@ export function convertFlowObjectTypeAnnotation(
     }
 
     if (value.type === "ArrayTypeAnnotation" && value.elementType) {
-      const children = resolveFlowObjectTypeAnnotation(value.elementType, flowTypes);
+      const children = resolveFlowTypeAnnotation(value.elementType, flowTypes);
 
       return {
         ...obj,
