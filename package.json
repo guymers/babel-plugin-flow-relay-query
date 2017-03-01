@@ -44,7 +44,7 @@
     "babel-plugin-syntax-trailing-function-commas": "^6.8.0",
 
     "babel-relay-plugin": "0.10.0",
-    "graphql": "0.8.2"
+    "graphql": "0.9.1"
   },
 
   "devDependencies": {
