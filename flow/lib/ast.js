@@ -96,7 +96,13 @@ type TypeAlias = {
   right: TypeTypeAnnotation;
 }
 
-type TypeTypeAnnotation = BooleanTypeAnnotation | NumberTypeAnnotation | StringTypeAnnotation | ObjectTypeAnnotation;
+type TypeTypeAnnotation =
+  BooleanTypeAnnotation |
+  NumberTypeAnnotation |
+  StringTypeAnnotation |
+  ArrayTypeAnnotation |
+  ObjectTypeAnnotation |
+  GenericTypeAnnotation;
 
 type BooleanTypeAnnotation = {
   type: "BooleanTypeAnnotation";
@@ -108,6 +114,11 @@ type NumberTypeAnnotation = {
 
 type StringTypeAnnotation = {
   type: "StringTypeAnnotation";
+}
+
+type ArrayTypeAnnotation = {
+  type: "ArrayTypeAnnotation";
+  elementType: TypeTypeAnnotation;
 }
 
 type ObjectTypeAnnotation = {

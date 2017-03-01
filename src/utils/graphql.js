@@ -1,69 +1,71 @@
 /* @flow */
 import {
   GraphQLList,
-  GraphQLObjectType,
   GraphQLNonNull,
+  GraphQLObjectType,
   GraphQLScalarType
 } from "graphql";
-import type { GraphQLSchema } from "graphql";
+import type { GraphQLOutputType, GraphQLSchema } from "graphql";
 import type {
   FlowTypes,
   FlowType
 } from "./types";
 import type { ChildFragmentTransformations } from "../ChildFragmentTransformations";
-import { convertFlowObjectTypeAnnotation } from "./flow";
+import { convertTypeAnnotationToFlowType } from "./flow";
 
 export function checkPropsObjectTypeMatchesSchema(
   schema: GraphQLSchema,
   fragmentType: string,
-  objectType: ObjectTypeProperty
+  objectType: ObjectTypeProperty,
+  flowTypes: { [name: string ]: ObjectTypeAnnotation }
 ) {
   const graphqlType = schema.getType(fragmentType);
   if (!graphqlType || !(graphqlType instanceof GraphQLObjectType)) {
     throw new Error(`There is no GraphQL object type named '${fragmentType}'`);
   }
 
-  const typeAnnotation = objectType.value;
-  const flowTypes = typeAnnotation.type === "ObjectTypeAnnotation" ? convertFlowObjectTypeAnnotation(typeAnnotation) : {};
-  const graphqlTypes = convertGraphqlObjectType(graphqlType);
+  const flowType = convertTypeAnnotationToFlowType(objectType.value, objectType.optional, flowTypes);
+  const graphqlTypes = convertGraphqlTypeToFlowType(graphqlType, false);
 
-  const result = compareFlowTypes(flowTypes, graphqlTypes);
+  const result = compareFlowTypes(flowType, graphqlTypes);
   if (result.length > 0) {
     const errors = result.map(r => `Expected type '${r.expected}', actual type '${r.actual}' for path ${r.path.join(".")}`);
     throw new Error(`Errors for fragment ${fragmentType}:\n${errors.join("\n")}`);
   }
 }
 
-function convertGraphqlObjectType(objectType: GraphQLObjectType): FlowTypes {
+function convertGraphqlObjectType(objectType: GraphQLObjectType, objectTypeCache: Object): FlowTypes {
   const objectTypeString = objectType.toString();
-  if (!convertGraphqlObjectType.cache[objectTypeString]) {
+  if (!objectTypeCache[objectTypeString]) {
     const fields = objectType.getFields();
     // placeholder while we have possible recursive structures
-    convertGraphqlObjectType.cache[objectTypeString] = true;
-    convertGraphqlObjectType.cache[objectTypeString] = Object.keys(fields).reduce((obj, key) => {
+    objectTypeCache[objectTypeString] = true; // eslint-disable-line no-param-reassign
+    objectTypeCache[objectTypeString] = Object.keys(fields).reduce((obj, key) => { // eslint-disable-line no-param-reassign
       const field = fields[key];
-      return { ...obj, [key]: graphqlFieldToString(field) };
+      return {
+        ...obj,
+        [key]: convertGraphqlTypeToFlowType(field.type, true, objectTypeCache)
+      };
     }, {});
   }
 
-  return convertGraphqlObjectType.cache[objectTypeString];
+  return objectTypeCache[objectTypeString];
 }
 
-convertGraphqlObjectType.cache = {};
-
-function graphqlFieldToString(field: Object): FlowType {
-  let nullable = true;
-  let graphqlType = field.type;
+function convertGraphqlTypeToFlowType(
+  graphqlType: GraphQLOutputType,
+  nullable: boolean,
+  objectTypeCache: Object = {}
+): FlowType {
   if (graphqlType instanceof GraphQLNonNull) {
-    nullable = false;
-    graphqlType = graphqlType.ofType;
+    return convertGraphqlTypeToFlowType(graphqlType.ofType, false, objectTypeCache);
   }
 
   if (graphqlType instanceof GraphQLObjectType) {
     return {
       type: "object",
       nullable,
-      properties: convertGraphqlObjectType(graphqlType)
+      properties: convertGraphqlObjectType(graphqlType, objectTypeCache)
     };
   }
 
@@ -71,7 +73,7 @@ function graphqlFieldToString(field: Object): FlowType {
     return {
       type: "array",
       nullable,
-      children: graphqlType.ofType instanceof GraphQLObjectType ? convertGraphqlObjectType(graphqlType.ofType) : null
+      child: convertGraphqlTypeToFlowType(graphqlType.ofType, true, objectTypeCache)
     };
   }
 
@@ -92,49 +94,53 @@ function graphqlFieldToString(field: Object): FlowType {
 
 type CompareFlowTypesResult = { path: Array<string>, expected: string, actual: string };
 
-function compareFlowTypes(a: FlowTypes, b: FlowTypes, path: Array<string> = []): Array<CompareFlowTypesResult> {
-  const createPath = (key) => {
-    const pathCopy = path.slice();
-    pathCopy.push(key);
-    return pathCopy;
-  };
+const typeToString: (type: FlowType) => string = type => (type.nullable ? "?" : "") + type.type;
 
-  const typeToString: (type: FlowType) => string = type => (type.nullable ? "?" : "") + type.type;
+function compareFlowTypes(a: FlowType, b: FlowType, path: Array<string> = []): Array<CompareFlowTypesResult> {
+  const actual = typeToString(a);
+  const expected = typeToString(b);
 
-  const aKeys = Object.keys(a).sort();
-  return aKeys.reduce((result, key) => {
-    // babel relay plugin handles missing fields
-    if (b[key]) {
-      const aType = a[key];
-      const bType = b[key];
-
-      const actual = typeToString(aType);
-      const expected = typeToString(bType);
-
-      if (actual !== expected) {
-        result.push({ path: createPath(key), actual, expected });
-      } else if (aType.type === "object" && bType.type === "object") {
-        return result.concat(compareFlowTypes(aType.properties, bType.properties, createPath(key)));
-      }
-    }
-    return result;
-  }, []);
-}
-
-function getObjectFromAnnotation(
-  typeAnnotation: Object,
-  flowTypes: { [name: string]: ObjectTypeAnnotation }
-): Object {
-  switch (typeAnnotation.type) {
-    case "ObjectTypeAnnotation":
-      return convertFlowObjectTypeAnnotation(typeAnnotation, flowTypes);
-    case "GenericTypeAnnotation":
-      return typeAnnotation.id && flowTypes[typeAnnotation.id.name]
-        ? convertFlowObjectTypeAnnotation(flowTypes[typeAnnotation.id.name], flowTypes)
-        : {};
-    default:
-      return {};
+  if (actual !== expected) {
+    return [{ path, actual, expected }];
   }
+
+  // help flow, cant handle an &&
+  let aProps = null;
+  if (a.type === "object") {
+    aProps = a.properties;
+  }
+
+  let bProps = null;
+  if (b.type === "object") {
+    bProps = b.properties;
+  }
+
+  if (aProps && bProps) {
+    const createPath = (key) => {
+      const pathCopy = path.slice();
+      pathCopy.push(key);
+      return pathCopy;
+    };
+
+    const aKeys = Object.keys(aProps).sort();
+    return aKeys.reduce((result, key) => {
+      // babel relay plugin handles missing fields
+      const bType = bProps && bProps[key];
+      if (bType) {
+        const aType = aProps && aProps[key];
+        if (aType) {
+          return result.concat(compareFlowTypes(aType, bType, createPath(key)));
+        }
+      }
+      return result;
+    }, []);
+  }
+
+  if (a.type === "array" && b.type === "array") {
+    return compareFlowTypes(a.child, b.child, path);
+  }
+
+  return [];
 }
 
 export function toGraphQLQueryString(
@@ -147,10 +153,19 @@ export function toGraphQLQueryString(
   flowTypes: { [name: string]: ObjectTypeAnnotation }
 ): string {
   const fragmentKey = objectType.key.name;
-  const typeAnnotation = objectType.value;
-  const obj = getObjectFromAnnotation(typeAnnotation, flowTypes);
+  const flowType = convertTypeAnnotationToFlowType(objectType.value, objectType.optional, flowTypes);
 
-  const graphQlQueryBody = objectToGraphQLString(obj);
+  // remove the first and last lines if flowType is an object as opening braces are added later
+  let graphQlQueryBody = flowTypeToGraphQLString(flowType).trim();
+  if (graphQlQueryBody) {
+    if (graphQlQueryBody[0] === "{") {
+      graphQlQueryBody = graphQlQueryBody.substr(graphQlQueryBody.indexOf("\n") + 1);
+    }
+
+    if (graphQlQueryBody[graphQlQueryBody.length - 1] === "}") {
+      graphQlQueryBody = graphQlQueryBody.substr(0, graphQlQueryBody.lastIndexOf("\n"));
+    }
+  }
 
   const childContainersForFragment = Object.keys(componentContainerFragments).reduce((c, name) => {
     const fragmentKeys = componentContainerFragments[name];
@@ -192,23 +207,23 @@ export function toGraphQLQueryString(
   return `${graphQlQuery}`;
 }
 
-function objectToGraphQLString(obj: { [key: string]: FlowType }, level: number = 1): string {
-  const indentation = "  ".repeat(level);
+function flowTypeToGraphQLString(flowType: FlowType, level: number = 1): string {
+  if (flowType.type === "object") {
+    const indentation = "  ".repeat(level);
 
-  const strings = Object.keys(obj).reduce((parts, key) => {
-    const value = obj[key];
-    let str = key;
-    if (value.type === "object") {
-      str = `${str} {\n${objectToGraphQLString(value.properties, level + 1)}\n${indentation}}`;
-    }
-    if (value.type === "array" && value.children) {
-      str = `${str} {\n${objectToGraphQLString(value.children, level + 1)}\n${indentation}}`;
-    }
-    parts.push(indentation + str);
-    return parts;
-  }, []);
+    const props = flowType.properties;
+    const strings = Object.keys(props).reduce((parts, key) => {
+      const value = props[key];
+      parts.push(`${indentation}${key}${flowTypeToGraphQLString(value, level + 1)}`);
+      return parts;
+    }, []);
 
-  return strings.join("\n");
+    return ` {\n${strings.join("\n")}\n${"  ".repeat(level - 1)}}`;
+  } else if (flowType.type === "array") {
+    return flowTypeToGraphQLString(flowType.child, level);
+  }
+
+  return "";
 }
 
 function directivesToGraphQLString(directives: Object): string {

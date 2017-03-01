@@ -6,7 +6,7 @@ import generateFragmentFromProps from "../../../../src/generateFragmentFromProps
 type ArticleGraph = {
   title: string;
   posted: string;
-  tags: string[];
+  tags: ?string[];
 }
 
 type AuthorGraph = {
