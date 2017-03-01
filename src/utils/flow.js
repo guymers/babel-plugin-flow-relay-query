@@ -1,71 +1,62 @@
 /* @flow */
-import type { FlowTypes } from "./types";
+import type { FlowType, FlowTypes } from "./types";
 
-function flowTypeAnnotationToString(type: TypeTypeAnnotation): string {
+function flowTypeAnnotationToString(type: TypeTypeAnnotation, nullable: boolean): FlowType {
   switch (type.type) {
-    case "NullableTypeAnnotation":
-      return `?${flowTypeAnnotationToString(type.typeAnnotation)}`;
     case "BooleanTypeAnnotation":
-      return "boolean";
+      return { type: "boolean", nullable };
     case "NumberTypeAnnotation":
-      return "number";
+      return { type: "number", nullable };
     case "StringTypeAnnotation":
-      return "string";
+      return { type: "string", nullable };
     default:
-      return "any";
+      return { type: "any", nullable };
   }
-}
-
-function resolveFlowTypeAnnotation(
-  objectType: TypeTypeAnnotation,
-  flowTypes: { [name: string ]: ObjectTypeAnnotation }
-): TypeTypeAnnotation {
-  if (objectType.type === "GenericTypeAnnotation" && objectType.id && flowTypes[objectType.id.name]) {
-    return flowTypes[objectType.id.name];
-  }
-
-  return objectType;
 }
 
 // convert an ObjectTypeAnnotation to a js object
-export function convertFlowObjectTypeAnnotation(
+function convertFlowObjectTypeAnnotation(
   objectType: ObjectTypeAnnotation,
-  flowTypes: { [name: string ]: ObjectTypeAnnotation } = {}
+  flowTypes: { [name: string ]: ObjectTypeAnnotation }
 ): FlowTypes {
   return objectType.properties.reduce((obj, property) => {
     const key = property.key.name;
-    const value = resolveFlowTypeAnnotation(property.value, flowTypes);
-
-    if (value.type === "ObjectTypeAnnotation") {
-      return {
-        ...obj,
-        [key]: {
-          type: "object",
-          nullable: property.optional,
-          properties: convertFlowObjectTypeAnnotation(value, flowTypes)
-        }
-      };
-    }
-
-    if (value.type === "ArrayTypeAnnotation" && value.elementType) {
-      const children = resolveFlowTypeAnnotation(value.elementType, flowTypes);
-
-      return {
-        ...obj,
-        [key]: {
-          type: "array",
-          nullable: property.optional,
-          children: children.type === "ObjectTypeAnnotation" ? convertFlowObjectTypeAnnotation(children, flowTypes) : null
-        }
-      };
-    }
 
     return {
       ...obj,
-      [key]: {
-        type: flowTypeAnnotationToString(value),
-        nullable: property.optional
-      }
+      [key]: convertTypeAnnotationToFlowType(property.value, property.optional, flowTypes)
     };
   }, {});
+}
+
+export function convertTypeAnnotationToFlowType(
+  value: TypeTypeAnnotation,
+  nullable: boolean,
+  flowTypes: { [name: string ]: ObjectTypeAnnotation }
+): FlowType {
+  if (value.type === "NullableTypeAnnotation") {
+    return convertTypeAnnotationToFlowType(value.typeAnnotation, true, flowTypes);
+  }
+
+  if (value.type === "GenericTypeAnnotation" && flowTypes[value.id.name]) {
+    return convertTypeAnnotationToFlowType(flowTypes[value.id.name], nullable, flowTypes);
+  }
+
+  if (value.type === "ObjectTypeAnnotation") {
+    return {
+      type: "object",
+      nullable,
+      properties: convertFlowObjectTypeAnnotation(value, flowTypes)
+    };
+  }
+
+  if (value.type === "ArrayTypeAnnotation") {
+    return {
+      type: "array",
+      nullable,
+      child: convertTypeAnnotationToFlowType(value.elementType, nullable, flowTypes)
+    };
+  }
+
+  return flowTypeAnnotationToString(value, nullable);
 }

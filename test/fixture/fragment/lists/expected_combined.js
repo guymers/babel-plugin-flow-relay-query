@@ -6,7 +6,7 @@ import Relay from "react-relay";
 type ArticleGraph = {
   title: string;
   posted: string;
-  tags: string[];
+  tags: ?string[];
 };
 
 type AuthorGraph = {

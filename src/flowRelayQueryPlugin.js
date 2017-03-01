@@ -210,7 +210,7 @@ export default function (schema: GraphQLSchema, options: PluginOptions = {}): (p
         const fragmentName = generateFragmentOptions.name || defaultFragmentName(reactComponentName, fragmentType);
         const fragmentDirectives = generateFragmentOptions.directives || {};
 
-        checkPropsObjectTypeMatchesSchema(schema, fragmentType, typeAtKey);
+        checkPropsObjectTypeMatchesSchema(schema, fragmentType, typeAtKey, state.flowTypes);
         const graphQlQuery = toGraphQLQueryString(
           fragmentName,
           fragmentType,
