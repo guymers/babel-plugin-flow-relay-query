@@ -16,6 +16,17 @@ function flowTypeAnnotationToString(type: TypeTypeAnnotation): string {
   }
 }
 
+function resolveFlowTypeAnnotation(
+  objectType: TypeTypeAnnotation,
+  flowTypes: { [name: string ]: ObjectTypeAnnotation }
+): TypeTypeAnnotation {
+  if (objectType.type === "GenericTypeAnnotation" && objectType.id && flowTypes[objectType.id.name]) {
+    return flowTypes[objectType.id.name];
+  }
+
+  return objectType;
+}
+
 // convert an ObjectTypeAnnotation to a js object
 export function convertFlowObjectTypeAnnotation(
   objectType: ObjectTypeAnnotation,
@@ -23,7 +34,8 @@ export function convertFlowObjectTypeAnnotation(
 ): FlowTypes {
   return objectType.properties.reduce((obj, property) => {
     const key = property.key.name;
-    const value = property.value;
+    const value = resolveFlowTypeAnnotation(property.value, flowTypes);
+
     if (value.type === "ObjectTypeAnnotation") {
       return {
         ...obj,
@@ -35,13 +47,15 @@ export function convertFlowObjectTypeAnnotation(
       };
     }
 
-    if (value.type === "GenericTypeAnnotation" && value.id && flowTypes[value.id.name]) {
+    if (value.type === "ArrayTypeAnnotation" && value.elementType) {
+      const children = resolveFlowTypeAnnotation(value.elementType, flowTypes);
+
       return {
         ...obj,
         [key]: {
-          type: "object",
+          type: "array",
           nullable: property.optional,
-          properties: convertFlowObjectTypeAnnotation(flowTypes[value.id.name], flowTypes)
+          children: children.type === "ObjectTypeAnnotation" ? convertFlowObjectTypeAnnotation(children, flowTypes) : null
         }
       };
     }

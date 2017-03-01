@@ -42,7 +42,8 @@ articleType = new GraphQLObjectType({
     content: { type: new GraphQLNonNull(GraphQLString) },
     views: { type: new GraphQLNonNull(GraphQLInt) },
     sponsored: { type: new GraphQLNonNull(GraphQLBoolean) },
-    author: { type: new GraphQLNonNull(authorType) }
+    author: { type: new GraphQLNonNull(authorType) },
+    tags: { type: new GraphQLList(GraphQLString) }
   })
 });
 
