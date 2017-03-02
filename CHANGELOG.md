@@ -1,3 +1,8 @@
+## 0.10.8
+
+* Support array flow types (@kalley)
+* Allow Flow to GraphQL type checker to work on all types
+
 ## 0.10.7
 
 * Handle React.PureComponent (@kalley)
