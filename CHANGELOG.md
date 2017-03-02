@@ -1,3 +1,7 @@
+## 0.10.9
+
+* Update GraphQL to 0.9.1
+
 ## 0.10.8
 
 * Support array flow types (@kalley)
