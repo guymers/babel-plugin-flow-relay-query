@@ -72,7 +72,6 @@ function convertGraphqlTypeToFlowType(
   if (graphqlType instanceof GraphQLList) {
     return {
       type: "array",
-      nullable,
       child: convertGraphqlTypeToFlowType(graphqlType.ofType, true, objectTypeCache)
     };
   }
