@@ -53,7 +53,6 @@ export function convertTypeAnnotationToFlowType(
   if (value.type === "ArrayTypeAnnotation") {
     return {
       type: "array",
-      nullable,
       child: convertTypeAnnotationToFlowType(value.elementType, nullable, flowTypes)
     };
   }
