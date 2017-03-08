@@ -21,10 +21,14 @@ function convertFlowObjectTypeAnnotation(
 ): FlowTypes {
   return objectType.properties.reduce((obj, property) => {
     const key = property.key.name;
+    // property.optional indicates the presence of a question mark at the end of a field
+    // eg. field?: blah
+    // given a GraphQL schema cannot represent an optional object key we don't need to care about it
+    const nullable = false;
 
     return {
       ...obj,
-      [key]: convertTypeAnnotationToFlowType(property.value, property.optional, flowTypes)
+      [key]: convertTypeAnnotationToFlowType(property.value, nullable, flowTypes)
     };
   }, {});
 }

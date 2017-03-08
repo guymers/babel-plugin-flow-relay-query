@@ -12,7 +12,7 @@ type ArticleGraph = {
 type AuthorGraph = {
   name: string;
   email: string;
-  articles?: ArticleGraph[];
+  articles: ArticleGraph[];
 }
 
 type AuthorProps = {
