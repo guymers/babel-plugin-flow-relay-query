@@ -28,7 +28,7 @@ authorType = new GraphQLObjectType({
     twitter: { type: GraphQLString },
     editor: { type: new GraphQLNonNull(editorType) },
     articles: {
-      type: new GraphQLList(articleType)
+      type: new GraphQLList(new GraphQLNonNull(articleType))
     }
   })
 });
