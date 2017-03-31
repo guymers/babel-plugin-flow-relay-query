@@ -1,0 +1,2 @@
+/* @flow */
+export type AliasFor<N: string, V: *> = V // eslint-disable-line no-unused-vars
