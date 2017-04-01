@@ -24,7 +24,7 @@
     "do-publish": "npm run check && npm run build && npm run build-flow && npm test && npm publish",
     "benchmark": "babel-node test/benchmark/benchmark",
     "test": "mocha test/fixture",
-    "coverage": "rm -rf coverage && babel-node node_modules/istanbul/lib/cli cover _mocha -- test/fixture"
+    "coverage": "rm -rf coverage && NODE_ENV=test nyc npm test && nyc report"
   },
 
   "dependencies": {
@@ -54,7 +54,9 @@
     "babel-preset-stage-2": "^6.5.0",
 
     "mocha": "3.2.0",
-    "istanbul": "1.0.0-alpha.2",
+    "nyc": "10.2.0",
+    "babel-register": "^6.9.0",
+    "babel-plugin-istanbul": "4.1.1",
     "glob": "7.1.1",
     "react": "15.4.1",
     "react-dom": "15.4.1",
@@ -73,5 +75,30 @@
     "eslint-plugin-import": "2.2.0",
     "eslint-plugin-flowtype": "2.30.4",
     "flow-bin": "0.42.0"
+  },
+
+  "babel": {
+    "presets": ["es2015", "react", "stage-2"],
+    "plugins": [],
+    "env": {
+      "test": {
+        "plugins": ["istanbul"]
+      }
+    }
+  },
+
+  "nyc": {
+    "include": [
+      "src/**/*.js"
+    ],
+    "require": [
+      "babel-register"
+    ],
+    "reporter": [
+      "html"
+    ],
+    "report-dir": "coverage",
+    "sourceMap": false,
+    "instrument": false
   }
 }
