@@ -156,6 +156,7 @@ export function toGraphQLQueryString(
 
   // remove the first and last lines if flowType is an object as opening braces are added later
   let graphQlQueryBody = flowTypeToGraphQLString(flowType).trim();
+
   if (graphQlQueryBody) {
     if (graphQlQueryBody[0] === "{") {
       graphQlQueryBody = graphQlQueryBody.substr(graphQlQueryBody.indexOf("\n") + 1);
@@ -207,6 +208,8 @@ export function toGraphQLQueryString(
 }
 
 function flowTypeToGraphQLString(flowType: FlowType, level: number = 1): string {
+  const fieldName = flowType.fieldName ? `: ${flowType.fieldName}` : "";
+
   if (flowType.type === "object") {
     const indentation = "  ".repeat(level);
 
@@ -217,12 +220,12 @@ function flowTypeToGraphQLString(flowType: FlowType, level: number = 1): string 
       return parts;
     }, []);
 
-    return ` {\n${strings.join("\n")}\n${"  ".repeat(level - 1)}}`;
+    return `${fieldName} {\n${strings.join("\n")}\n${"  ".repeat(level - 1)}}`;
   } else if (flowType.type === "array") {
     return flowTypeToGraphQLString(flowType.child, level);
   }
 
-  return "";
+  return fieldName;
 }
 
 function directivesToGraphQLString(directives: Object): string {
