@@ -25,8 +25,16 @@ const parseFileBabelOptions = {
 };
 
 export function parseFile(filename: string, visitor: Object, state: Object): void {
-  const code = fs.readFileSync(filename, "utf8");
-  const file = pretransform(code, parseFileBabelOptions);
+  try {
+    const code = fs.readFileSync(filename, "utf8");
+    const file = pretransform(code, parseFileBabelOptions);
 
-  traverse(file.ast, visitor, null, state);
+    traverse(file.ast, visitor, null, state);
+  } catch (err) {
+    if (err.code === "ENOENT") {
+      console.warn(`babel-plugin-flow-relay-query: File '${filename}' does not exist`); // eslint-disable-line no-console
+    } else {
+      throw err;
+    }
+  }
 }

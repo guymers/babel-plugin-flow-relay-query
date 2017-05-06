@@ -23,7 +23,9 @@
     "build-flow": "printf '%b' 'FragmentOptions.js\\0ChildFragmentTransformations.js\\0generateFragmentFromProps.js\\0generateFragmentFromPropsFor.js\\0markers.js\\0' | xargs -0 -I{} cp src/{} lib/{}.flow",
     "do-publish": "npm run check && npm run build && npm run build-flow && npm test && npm publish",
     "benchmark": "babel-node test/benchmark/benchmark",
-    "test": "mocha test/fixture",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "mocha --recursive test/unit",
+    "test:integration": "mocha test/fixture",
     "coverage": "rm -rf coverage && NODE_ENV=test nyc npm test && nyc report"
   },
 
