@@ -2,6 +2,7 @@
 import fs from "fs";
 import path from "path";
 import glob from "glob";
+import { describe, it } from "mocha";
 import assert from "assert";
 import { transformFileSync } from "babel-core";
 import createSchema from "../../src/createSchema";
