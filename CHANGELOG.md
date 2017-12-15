@@ -1,4 +1,4 @@
-## 0.10.10
+## 0.10.11
 
 * Update to new React.Component Flow type
 
