@@ -1,3 +1,7 @@
+## 0.10.10
+
+* Update to new React.Component Flow type
+
 ## 0.10.9
 
 * Update GraphQL to 0.9.1

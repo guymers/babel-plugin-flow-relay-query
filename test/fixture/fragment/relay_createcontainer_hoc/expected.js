@@ -18,7 +18,7 @@ type ArticleProps = {
   }
 };
 
-class Article extends React.Component<void, ArticleProps, void> {
+class Article extends React.Component<ArticleProps, void> {
   render() {
     const { article } = this.props;
     return <div>

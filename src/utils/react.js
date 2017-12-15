@@ -37,7 +37,7 @@ export function parseReactComponentClass(node: ClassDeclaration): ?ReactComponen
     propType: n.id.name
   });
 
-  const typeParamAnnotation = node.superTypeParameters && node.superTypeParameters.params[1];
+  const typeParamAnnotation = node.superTypeParameters && node.superTypeParameters.params[0];
   if (typeParamAnnotation && typeParamAnnotation.type === "GenericTypeAnnotation") {
     return result(typeParamAnnotation);
   }

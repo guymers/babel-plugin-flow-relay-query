@@ -97,12 +97,18 @@ type TypeAlias = {
 }
 
 type TypeTypeAnnotation =
+  NullableTypeAnnotation |
   BooleanTypeAnnotation |
   NumberTypeAnnotation |
   StringTypeAnnotation |
   ArrayTypeAnnotation |
   ObjectTypeAnnotation |
   GenericTypeAnnotation;
+
+type NullableTypeAnnotation = {
+  type: "NullableTypeAnnotation";
+  typeAnnotation: TypeTypeAnnotation
+}
 
 type BooleanTypeAnnotation = {
   type: "BooleanTypeAnnotation";

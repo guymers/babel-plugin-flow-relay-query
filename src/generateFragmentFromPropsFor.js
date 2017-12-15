@@ -1,6 +1,6 @@
 /* @flow */
 import type { FragmentOptions } from "./FragmentOptions";
 
-export default function (component: ReactClass<*>, options?: FragmentOptions): Function {
+export default function (component: React$Node, options?: FragmentOptions): Function {
   return () => options;
 }

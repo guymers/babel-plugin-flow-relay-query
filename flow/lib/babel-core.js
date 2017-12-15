@@ -14,7 +14,7 @@ declare module "babel-core" {
     transformFromAst(ast: Object, code: string, opts: Object): BabelFileResult;
   }
 
-  declare function traverse(): void;
+  declare function traverse(a: any, b: any, c: any, d: any): void;
 }
 
 declare module "babel-core/lib/helpers/resolve" {
@@ -38,7 +38,7 @@ declare class babelCore$Plugin extends babelCore$Store {
   visitor: Object;
 }
 
-declare class babelCore$Store extends Map {
+declare class babelCore$Store extends Map<string, any> {
   dynamicData: Object;
   get(key: string): any;
 }
